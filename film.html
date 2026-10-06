@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מהכרטיס ועד ה-PR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+    --navy:#0B1220; --navy2:#121B2E; --teal:#14B8A6; --teal-light:#5EEAD4; --teal-dark:#0F766E;
+    --gold:#F59E0B; --purple:#9333EA; --red:#EF4444; --red-box:#DC2626; --red-dark:#B91C1C;
+    --blue-box:#2563EB; --ink:#0F172A; --muted:#64748B; --card:#F1F5F9; --line:#E2E8F0; --white:#FFFFFF;
+    --ease:cubic-bezier(0.16, 1, 0.3, 1);
+    --mono:"Cascadia Code", Consolas, "Courier New", monospace;
+  }
+  /* the film: one 1600 x 900 canvas like the deck's, on navy, with the deck's tokens */
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; overflow:hidden; background:var(--navy); }
+  body{ font-family:'Rubik', 'Segoe UI', Arial, sans-serif; color:#E2E8F0; -webkit-font-smoothing:antialiased; }
+  #stage{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  #film{ position:relative; width:1600px; height:900px; flex:0 0 auto; overflow:hidden; background:var(--navy); direction:rtl; }
+  .l{ unicode-bidi:isolate; direction:ltr; }
+  code, .mono{ font-family:var(--mono); }
+
+  /* header: the scene's title on the right, the parts of the flow under it */
+  .f-head{ position:absolute; top:30px; right:70px; left:70px; height:64px; display:flex; align-items:center; gap:18px; }
+  .f-title{ font-size:36px; font-weight:800; color:#fff; letter-spacing:-.01em; transition:opacity .45s ease, transform .45s var(--ease); }
+  .f-title.out{ opacity:0; transform:translateY(-10px); }
+  .f-tag{ margin-right:auto; font-size:15px; color:#94A3B8; border:1px solid #23314F; border-radius:999px; padding:4px 14px; }
+  /* the clock: a day of work in two minutes, in the corner */
+  .f-clock{ display:flex; align-items:center; gap:10px; direction:ltr; padding:6px 16px 6px 8px; border-radius:999px;
+            background:#121B2E; border:1px solid #23314F; transition:border-color .4s ease, box-shadow .4s ease; }
+  .f-clock .dial{ position:relative; width:32px; height:32px; border-radius:50%; border:2px solid #94A3B8; flex:0 0 auto; }
+  .f-clock .dial i{ position:absolute; left:50%; bottom:50%; width:2.5px; margin-left:-1.25px; border-radius:2px; transform-origin:50% 100%; }
+  .f-clock .hh{ height:8px; background:#E2E8F0; }
+  .f-clock .mm{ height:12px; background:var(--teal-light); }
+  .f-clock .tm{ font-family:var(--mono); font-size:24px; font-weight:700; color:#fff; font-variant-numeric:tabular-nums; min-width:68px; }
+  .f-clock .day{ font-size:16px; color:#94A3B8; direction:rtl; min-width:46px; }
+  .f-clock.next{ border-color:var(--gold); box-shadow:0 0 0 4px rgba(245,158,11,.14); }
+  .f-clock.next .day{ color:var(--gold); font-weight:700; }
+  .f-stages{ position:absolute; top:106px; right:70px; display:flex; gap:10px; }
+  .f-stages span{ min-width:150px; text-align:center; font-size:17px; font-weight:600; padding:6px 16px; border-radius:999px;
+                  background:#121B2E; color:#64748B; border:1px solid #1F2B45; transition:all .45s var(--ease); }
+  .f-stages span.done{ color:#94A3B8; }
+  .f-stages span.on{ background:var(--teal); color:var(--navy); border-color:var(--teal); transform:translateY(-2px); }
+
+  /* the session: a terminal on the right */
+  .f-term{ position:absolute; top:168px; right:70px; width:640px; height:520px; background:#0F172A; border:1px solid #23314F;
+           border-radius:18px; overflow:hidden; box-shadow:0 18px 40px rgba(0,0,0,.35); transition:box-shadow .45s ease, border-color .45s ease; }
+  .f-term.busy{ border-color:#2B3A5C; box-shadow:0 0 0 4px rgba(20,184,166,.12), 0 18px 40px rgba(0,0,0,.35); }
+  .f-tbar{ height:42px; display:flex; align-items:center; gap:7px; padding:0 16px; background:#0B1324; border-bottom:1px solid #1F2B45; direction:ltr; }
+  .f-tbar i{ width:11px; height:11px; border-radius:50%; background:#334155; }
+  .f-tbar b{ margin-left:10px; font-family:var(--mono); font-size:15px; font-weight:600; color:#94A3B8; }
+  .f-lines{ position:absolute; top:42px; left:0; right:0; bottom:0; padding:14px 20px; display:flex; flex-direction:column;
+            justify-content:flex-end; gap:5px; direction:ltr; overflow:hidden; }
+  /* no ligatures: the mono font draws "->" as an arrow, and the hook prints two characters */
+  .f-line, .f-card .cmds code{ font-variant-ligatures:none; }
+  .f-line{ font-family:var(--mono); font-size:18px; line-height:1.4; color:#CBD5E1; white-space:pre-wrap; word-break:break-word;
+           opacity:0; transform:translateY(8px); transition:opacity .35s ease, transform .35s var(--ease); }
+  .f-line.in{ opacity:1; transform:none; }
+  .f-line.cmd{ color:#fff; font-weight:600; }
+  .f-line.cmd .p{ color:var(--teal-light); }
+  .f-line.cmd.typing::after{ content:''; display:inline-block; width:.55em; height:1em; margin-left:2px; background:#E6EDF3;
+                             vertical-align:-.15em; animation:f-blink .8s steps(1) infinite; }
+  @keyframes f-blink{ 50%{ opacity:0; } }
+  .f-line .mk{ display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:10px; vertical-align:1px; background:#475569; }
+  .f-line.say{ direction:rtl; font-family:'Rubik', 'Segoe UI', Arial, sans-serif; font-size:20px; color:#F1F5F9; }
+  .f-line.say, .f-line.wait{ text-wrap:pretty; }
+  .f-line.ok, .f-line.say.good{ color:#7EE787; }
+  /* a line printed by a program that is longer than the window: smaller, rather than broken mid-phrase */
+  .f-line.small{ font-size:16px; }
+  .f-line.stop{ color:#FCA5A5; font-weight:600; }
+  .f-line.wait{ direction:rtl; font-family:'Rubik', 'Segoe UI', Arial, sans-serif; font-size:20px; color:var(--gold); font-weight:600; }
+
+  /* the systems the session reaches, and the people behind them */
+  .f-map{ position:absolute; inset:0; pointer-events:none; }
+  .f-node{ position:absolute; height:66px; border-radius:14px; background:#121B2E; border:1.5px solid #1F2B45; padding:9px 16px;
+           display:flex; flex-direction:column; justify-content:center; gap:2px; opacity:.5; transition:opacity .45s ease, border-color .45s ease,
+           box-shadow .45s ease, transform .45s var(--ease); }
+  .f-node b{ font-size:21px; color:#fff; font-weight:700; }
+  .f-node span{ font-size:15px; color:#94A3B8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .f-node.seen{ opacity:.85; }
+  .f-node.on{ opacity:1; transform:scale(1.04); box-shadow:0 0 0 5px rgba(255,255,255,.06), 0 10px 26px rgba(0,0,0,.35); }
+  .f-node.on span{ color:#E2E8F0; }
+  .f-node.k-sys.on{ border-color:var(--teal); }
+  .f-node.k-people.on{ border-color:var(--gold); }
+  .f-node.k-pb.on{ border-color:var(--purple); }
+  .f-node.k-gate.on{ border-color:var(--red); }
+  .f-col-label{ position:absolute; font-size:15px; font-weight:700; color:#64748B; letter-spacing:.03em; }
+
+  .f-links{ position:absolute; inset:0; width:1600px; height:900px; overflow:visible; }
+  .f-links path{ fill:none; stroke:#1F2B45; stroke-width:2.5; transition:stroke .45s ease, stroke-width .45s ease; }
+  .f-links path.seen{ stroke:#2B3A5C; }
+  .f-links path.on{ stroke:var(--teal); stroke-width:3.5; }
+  .f-links path.on.k-people{ stroke:var(--gold); }
+  .f-links path.on.k-pb{ stroke:var(--purple); }
+  .f-packet{ position:absolute; left:0; top:0; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%; background:#fff;
+             box-shadow:0 0 12px 4px rgba(94,234,212,.75); offset-rotate:0deg; }
+  .f-packet.k-people{ box-shadow:0 0 12px 4px rgba(245,158,11,.75); }
+  .f-packet.k-pb{ box-shadow:0 0 12px 4px rgba(192,132,252,.8); }
+
+  /* the playbook under everything */
+  .f-pb{ position:absolute; right:70px; left:70px; top:708px; height:74px; border-radius:16px; background:#140F24; border:1.5px solid #2E1F4F;
+         display:flex; align-items:center; gap:14px; padding:0 22px; opacity:.6; transition:opacity .45s ease, border-color .45s ease, box-shadow .45s ease; }
+  .f-pb.on{ opacity:1; border-color:var(--purple); box-shadow:0 0 0 5px rgba(147,51,234,.14); }
+  .f-pb > b{ font-size:22px; color:#fff; font-weight:800; margin-left:8px; }
+  .f-pb .chip{ font-size:16px; padding:5px 13px; border-radius:999px; background:#1E1636; color:#C4B5FD; border:1px solid #3B2A66;
+               transition:all .4s var(--ease); white-space:nowrap; }
+  .f-pb .chip.on{ background:var(--purple); color:#fff; border-color:var(--purple); transform:translateY(-2px); }
+  .f-pb .sep{ flex:1; }
+
+  /* the caption: what the moment means, in Hebrew */
+  .f-cap{ position:absolute; right:70px; left:70px; top:800px; height:72px; display:flex; align-items:center; justify-content:center;
+          text-align:center; font-size:28px; font-weight:600; color:#fff; line-height:1.3; text-wrap:balance;
+          transition:opacity .4s ease, transform .4s var(--ease); }
+  .f-cap.out{ opacity:0; transform:translateY(8px); }
+
+  /* a title card between parts of the story */
+  .f-card{ position:absolute; inset:0; background:var(--navy); z-index:20; display:flex; flex-direction:column; align-items:center;
+           justify-content:center; gap:18px; text-align:center; opacity:0; pointer-events:none; transition:opacity .6s ease; }
+  .f-card.on{ opacity:1; }
+  .f-card h1{ font-size:64px; font-weight:900; color:#fff; letter-spacing:-.02em; line-height:1.15; max-width:1300px; text-wrap:balance; }
+  .f-card p{ font-size:28px; color:#CBD5E1; max-width:1100px; line-height:1.4; text-wrap:balance; }
+  .f-card .bar{ width:120px; height:6px; border-radius:6px; background:var(--teal); }
+  .f-card .cmds{ display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:14px; max-width:1300px; }
+  .f-card .cmds code{ direction:ltr; font-size:24px; font-weight:600; color:var(--teal-light); background:#121B2E; border:1px solid #23314F;
+                      border-radius:12px; padding:10px 18px; }
+
+  /* still: every element in its final place, for a screenshot without motion */
+  .still *{ transition:none !important; animation:none !important; }
+
+</style>
+</head>
+<body>
+<div id="stage"><div id="film"></div></div>
+<script>
+// The film's story: what is on screen and when. Every step follows the playbook's skills as they stand in
+// engineering-playbook (start-task, write-ticket, ask-product, finish-task, handoff, secret-handoff,
+// technical-engineering-email), its four hooks, its subagents and playbook_sync.py, and the order of the steps is the
+// skills' own. The ticket, the branch, the times of day and the outputs are an illustration, which the tag in the
+// corner says. The lesson at the end is the one the lecture opens with: the tests that ran in the wrong copy.
+window.FILM_STORY = {
+  tag: "המחשה",
+  terminal: "Claude Code",
+  clock: { start: "09:00", today: "היום", next: "למחרת" },
+  stages: ["מתחילים", "עובדים", "שואלים את המוצר", "מסיימים", "לומדים"],
+  playbook: {
+    title: "הפלייבוק",
+    chips: [{ id: "rules", t: "כללים" }, { id: "skills", t: "skills" }, { id: "hooks", t: "hooks" }, { id: "agents", t: "סוכני משנה" }, "|",
+            { id: "bdms", t: "bd-ms" }, { id: "bdclient", t: "bd-client" }, { id: "ws", t: "workspace" }],
+  },
+  labels: [{ t: "מערכות", x: 540, y: 140 }, { t: "אנשים", x: 110, y: 140 }],
+  nodes: [
+    { id: "jira", kind: "sys", title: "Jira", sub: "כרטיסים ותתי משימות", x: 540, y: 172, w: 270 },
+    { id: "confluence", kind: "sys", title: "Confluence", sub: "האפיון", x: 540, y: 258, w: 270 },
+    { id: "git", kind: "sys", title: "git", sub: "ענף ועותק עבודה", x: 540, y: 344, w: 270 },
+    { id: "tests", kind: "sys", title: "בדיקות", sub: "רצות בעותק של המשימה", x: 540, y: 430, w: 270 },
+    { id: "bitbucket", kind: "sys", title: "Bitbucket", sub: "Pull Request", x: 540, y: 516, w: 270 },
+    { id: "product", kind: "people", title: "מוצר", sub: "עונים בטבלת השאלות", x: 110, y: 215, w: 250 },
+    { id: "qa", kind: "people", title: "QA", sub: "מקבלים מה לבדוק", x: 110, y: 430, w: 250 },
+    { id: "devops", kind: "people", title: "DevOps", sub: "מקבלים מייל מנוסח", x: 110, y: 602, w: 250 },
+  ],
+  links: [["term", "jira", "sys"], ["term", "confluence", "sys"], ["term", "git", "sys"], ["term", "tests", "sys"], ["term", "bitbucket", "sys"],
+          ["jira", "product", "people"], ["jira", "qa", "people"], ["term", "devops", "people"], ["pb", "term", "pb"]],
+  scenes: [
+    // the video file opens with a title; in the lecture the presenter's own words open it
+    { card: { h: "מהכרטיס ועד ה-PR", p: "הפקודות שלנו, ומה קורה אחרי כל אחת מהן" }, hold: 2.8, videoOnly: true },
+
+    { title: "פותחים סשן", stage: 1, clear: true, time: "09:00",
+      caption: "בפתיחת סשן, hook מושך את הפלייבוק העדכני ומעדכן את ההנחיות בעותק.", beats: [
+      { pb: true, chips: ["rules", "skills", "hooks", "agents"], wait: 0.9 },
+      { out: "playbook f12f8df  workspace  current", to: "pb>term", mark: "var(--purple)", wait: 2.6 },
+    ], hold: 1.0 },
+
+    { title: "/start-task", stage: 1, clear: true, time: "09:02",
+      caption: "קודם הוא קורא את הכרטיס, ושואל חמש שאלות. אחת נכשלת? הוא עוצר ומדווח.", beats: [
+      { type: "/start-task BN-1234" },
+      { out: "Jira  getJiraIssue BN-1234", to: "term>jira", node: "jira", note: "קורא את הכרטיס", mark: "var(--teal)", wait: 1.2 },
+      { say: "חמש שאלות: בתחום שלנו, מחכה להחלטה, חסום, חסר מידע, כבר נעשה.", wait: 2.4 },
+      { out: "git  ls-remote --heads origin *BN-1234*", to: "term>git", node: "git", note: "אין ענף קיים", mark: "var(--teal)", wait: 1.2 },
+      { say: "השער עבר.", kind: "say good", wait: 1.2 },
+      { caption: "הוא פותח תת-משימה, ויוצר ענף ועותק עבודה נפרד מהגרסה העדכנית.", time: "09:05",
+        out: "Jira  createJiraIssue  Sub-task of BN-1234", to: "term>jira", node: "jira", note: "תת-משימה נפתחה", mark: "var(--teal)", wait: 1.3 },
+      { out: "git  worktree add --no-track", to: "term>git", node: "git", note: "ענף ועותק עבודה חדשים", mark: "var(--teal)", wait: 0.3 },
+      { out: "     -b feature/BN-1234/export-audit-report", mark: "transparent", wait: 0.3 },
+      { out: "     C:\\Dev\\work\\BN-1234\\bd-ms origin/release/6.b.5", mark: "transparent", wait: 2.2 },
+      { caption: "לפני שורת קוד אחת: מה זז בגרסה, מיזוג, וכל הבדיקות. התנגשות עוצרת הכול.", time: "09:08",
+        out: "release-scout  what moved on release/6.b.5", to: "term>git", node: "git", note: "מה זז בגרסה", mark: "var(--purple)", wait: 0.2 },
+      { pb: true, chips: ["agents"], wait: 1.2 },
+      { out: "git  merge origin/release/6.b.5", to: "term>git", node: "git", note: "הגרסה מוזגה", mark: "var(--teal)", wait: 1.2 },
+      { out: "dotnet build, then every test assembly", to: "term>tests", node: "tests", note: "כל הבדיקות רצו", mark: "var(--teal)", wait: 1.3 },
+      { out: "build ok, every assembly passed", kind: "ok", mark: "#7EE787", time: "09:24", wait: 1.4 },
+      { caption: "הכרטיס ותת-המשימה עוברים לסטטוס In Progress והסשן מקבל שם לפי הכרטיס.",
+        out: "Jira  BN-1234 and its Sub-task: In Progress", to: "term>jira", node: "jira", note: "In Progress", mark: "var(--teal)", wait: 1.4 },
+      { say: "מוכן לעבודה: ענף, עותק עבודה, גרסה ממוזגת ובדיקות שעברו.", kind: "say good", wait: 2.6 },
+    ], hold: 1.0 },
+
+    { title: "עובדים לפי הכללים", stage: 2, clear: true, time: "09:40",
+      caption: "בזמן העבודה hook חוסם לסוכן עריכה של עותק שנוצר, ומפנה למקור.", beats: [
+      { out: "Edit  bd-ms/CLAUDE.md", mark: "#94A3B8", wait: 0.9 },
+      { out: "hook  refused: a generated copy, edit the source", kind: "stop", mark: "var(--red)", wait: 0.2 },
+      { pb: true, chips: ["hooks"], wait: 2.6 },
+      { caption: "את האפיון הוא קורא מהמקור, וסוכן משנה בודק מולו מה כוסה ומה חסר.", time: "11:45",
+        out: "Confluence  the PRD page", to: "term>confluence", node: "confluence", note: "קורא את האפיון", mark: "var(--teal)", wait: 1.2 },
+      { out: "spec-auditor  covered, missing, wrong", mark: "var(--purple)", wait: 0.2 },
+      { pb: true, chips: ["agents"], wait: 2.6 },
+      { caption: "לפני שמספר יוצא החוצה, סוכני משנה בודקים אותו: סך הבדיקות, וכל טענה מול המקור.", time: "12:30",
+        out: "test-runner  one total, per assembly, the tree named", to: "term>tests", node: "tests", note: "סך אמין, עם שם העותק", mark: "var(--purple)", wait: 1.4 },
+      { out: "claim-checker  CONFIRMED", kind: "ok", mark: "var(--purple)", wait: 0.2 },
+      { pb: true, chips: ["agents"], wait: 2.4 },
+    ], hold: 0.8 },
+
+    { title: "/write-ticket", stage: 2, clear: true, time: "13:10",
+      caption: "כרטיס ב-Jira נכתב לפי תקן אחד, מוצג כטיוטה, ונקרא שוב אחרי הכתיבה.", beats: [
+      { type: "/write-ticket" },
+      { out: "jira_lint.py  title and body, warns only", mark: "#94A3B8", wait: 1.0 },
+      { say: "טיוטה: כותרת, סוג, שדות וגוף. ליצור?", kind: "wait", wait: 0.8 },
+      { type: "כן" },
+      { out: "Jira  createJiraIssue, then read it back", to: "term>jira", node: "jira", note: "כרטיס לפי התקן", mark: "var(--teal)", wait: 2.4 },
+    ], hold: 0.8 },
+
+    { title: "/ask-product", stage: 3, clear: true, time: "13:40",
+      caption: "שאלה למוצר נכנסת לטבלת השאלות ב-Jira עם המלצה בכל שורה.", beats: [
+      { type: "/ask-product" },
+      { out: "prd_questions.py build  the questions table", mark: "#94A3B8", wait: 1.6 },
+      { say: "הטבלה מוכנה. לפרסם?", kind: "wait", wait: 1.0 },
+      { type: "כן" },
+      { caption: "רק אחרי אישור בצ'אט הטבלה מתפרסמת, ומוצר מקבל את הכרטיס, חסום עד תשובה.",
+        out: "Jira  comment, assign Product, BLOCKED BY", to: "term>jira", node: "jira", note: "חסום עד תשובה", mark: "var(--teal)", wait: 1.0 },
+      { light: "product", to: "jira>product", note: "מקבלים את השאלות", wait: 3.2 },
+      { caption: "מוצר עונה בטבלה ומחזיר את הכרטיס. הסשן הבא קורא קודם את התשובות.", time: "15:30",
+        light: "jira", to: "jira>product", back: true, note: "התשובות בטבלה", also: [{ node: "product", note: "ענו והחזירו" }], wait: 1.4 },
+      { say: "בסשן הבא: קודם התשובות של מוצר.", wait: 2.6 },
+    ], hold: 0.8 },
+
+    { title: "/finish-task", stage: 4, clear: true, time: "16:10",
+      caption: "הוא פותח PR כטיוטה דרך ה-API של Bitbucket ומחזיר קישור מלא.", beats: [
+      { type: "/finish-task" },
+      { out: "Bitbucket API  POST pullrequests  draft: true", to: "term>bitbucket", node: "bitbucket", note: "PR כטיוטה", mark: "var(--teal)", wait: 1.2 },
+      { out: "201 Created  draft PR to release/6.b.5", kind: "ok", mark: "#7EE787", wait: 2.0 },
+      { caption: "את ה-PR ממזג אדם, או הסוכן כשביקשו ממנו במפורש למזג אותו.",
+        say: "ה-PR פתוח כטיוטה, ממתין לאדם.", kind: "wait", wait: 3.6 },
+      { caption: "לפני המשימה הבאה הוא בודק שוב כל PR שפתח. את מה שמוזג הוא מעביר בלוח.", time: "17:05",
+        out: "Bitbucket  re-check every PR opened: merged", to: "term>bitbucket", node: "bitbucket", note: "מוזג", mark: "var(--teal)", wait: 3.4 },
+      { caption: "מיזוג הוא לא פריסה. הכרטיס מחכה לפריסה עם מה לבדוק, והפריסה מעבירה אותו ל-QA.",
+        out: "Jira  BN-1234: Awaiting Deployment, what to check", to: "term>jira", node: "jira", note: "מחכה לפריסה", mark: "var(--teal)", wait: 2.0 },
+      { light: "jira", note: "Ready For QA", time: "17:50", wait: 0.6 },
+      { light: "qa", to: "jira>qa", note: "מה לבדוק ב-QA2", wait: 2.8 },
+    ], hold: 0.8 },
+
+    { title: "מה שנשאר אצל אנשים", stage: 4, clear: true, time: "18:00",
+      caption: "מייל ל-DevOps הסוכן מנסח, ואדם שולח.", beats: [
+      { say: "טיוטת מייל ל-DevOps מוכנה לשליחה.", kind: "wait", wait: 0.4 },
+      { light: "devops", to: "term>devops", note: "מקבלים מייל שאדם שלח", wait: 3.0 },
+      { caption: "פקודות GCP הוא לא מריץ. הוא מעביר אותן להרצה ידנית.",
+        say: "פקודה ל-GCP מחכה להרצה ידנית.", kind: "wait", wait: 3.0 },
+      { caption: "וסיסמה לא עוברת בצ'אט: אדם מגדיר משתנה סביבה, והסוכן קורא אותו בלי להציג.",
+        say: "סיסמה דרך משתנה סביבה, לא בצ'אט.", kind: "wait", wait: 3.6 },
+    ], hold: 0.8 },
+
+    { title: "/handoff", stage: 4, clear: true, time: "18:20",
+      caption: "ב-90% מהחלון הוא כותב דף מצב ופתיחה, ואדם מדביק אותה בסשן הבא.", beats: [
+      { type: "/handoff" },
+      { out: "STATUS-BN-1234.md  where the work stands", mark: "#94A3B8", wait: 1.0 },
+      { out: "NEXT-AGENT-PROMPT.md  the next session's opening", mark: "#94A3B8", wait: 3.0 },
+    ], hold: 0.8 },
+
+    // the lesson from the lecture's opening case, written once into the shared guidance
+    { title: "לקח לכולם", stage: 5, clear: true, time: "18:30",
+      caption: "טעות שתוקנה הופכת לכלל. מפתח מוסיף את הלקח להנחיות המשותפות, ומריץ contribute.", beats: [
+      { type: 'playbook_sync.py contribute --all -m "name the tree before a test total"' },
+      { out: "adopt  the edit goes back to _common, its source", mark: "var(--purple)", wait: 0.2 },
+      { pb: true, chips: ["rules"], wait: 2.0 },
+      { caption: "הקובץ שנערך קובע מי מקבל. לקח בהנחיות המשותפות מגיע לכל העותקים.",
+        out: "apply  every checkout: bd-ms, bd-client, workspace", mark: "var(--purple)", wait: 0.2 },
+      { pb: true, chips: ["rules", "bdms", "bdclient", "ws"], wait: 2.6 },
+      { out: "push  engineering-playbook to origin/main", to: "term>bitbucket", node: "bitbucket", note: "הפלייבוק עודכן", mark: "var(--purple)", wait: 2.0 },
+      { caption: "למחרת בבוקר ה-hook של כל מפתח מושך את העדכון, והכלל כבר שם.", time: "08:55", day: 1, wait: 2.4 },
+      { out: "playbook 7d41a2c f12f8df->7d41a2c  workspace  2 updated", kind: "small", to: "pb>term", mark: "var(--purple)", wait: 0.2 },
+      { out: "   updated: CLAUDE.md, AGENTS.md", mark: "transparent", wait: 0.2 },
+      { pb: true, chips: ["rules", "bdms", "bdclient", "ws"], wait: 3.0 },
+    ], hold: 1.0 },
+
+    { card: { h: "הטעות של 1142 הבדיקות\nכבר הפכה לכלל משותף", p: "הכללים נכנסים לכל סשן בתיקיית העבודה, ואף אחד לא צריך לזכור אותם.",
+              cmds: ["/start-task", "/write-ticket", "/ask-product", "/finish-task", "/handoff", "contribute"] }, hold: 5.0, last: true },
+  ],
+};
+
+</script>
+<script>
+// The film's engine. The story (film-story.js) is a list of scenes; a scene has a title, a part of the flow, a
+// caption, a time of day and beats, and a beat types a command, prints a line, sends a packet to a system and lights
+// it, moves the clock, or lights part of the playbook. Every moment is a setTimeout and every motion a CSS transition
+// or a Web Animation, so a recorder can slow the whole page down evenly and film it (make-video.js).
+// Modes, in the address: #rec waits for the recorder to call FILM.play(); #deck is the film inside the lecture's
+// slide: it skips the scenes made for the video file, shows its first frame and plays when the deck says so;
+// still=<seconds> shows that moment at once, for a screenshot. With none of them it plays by itself.
+(function () {
+  const STORY = window.FILM_STORY;
+  const HASH = location.hash;
+  const REC = /(^|[#&])rec(&|$)/.test(HASH);
+  const DECK = /(^|[#&])deck(&|$)/.test(HASH);
+  const STILL = (/(^|[#&])still=([\d.]+)/.exec(HASH) || [])[2];
+  const film = document.getElementById('film');
+  const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Latin runs inside Hebrew are isolated, so punctuation next to them stays on its own side. A run ends on a letter
+  // or digit, so a sentence's full stop stays outside it, and a comma between two English words stays inside it, or
+  // the list reads backwards: the same rules as splitScript in build.js.
+  const TOK = '[A-Za-z0-9/](?:[A-Za-z0-9._\\-/\\\\:#+]*[A-Za-z0-9])?';
+  const LATIN = new RegExp('[A-Za-z/](?:[A-Za-z0-9._\\-/\\\\:#+]*[A-Za-z0-9])?(?:,?\\s+' + TOK + ')*', 'g');
+  const he = (s) => esc(s).replace(LATIN, (m) => '<span class="l">' + m + '</span>');
+  const pad = (n) => String(n).padStart(2, '0');
+
+  function fit() {
+    const k = Math.min(innerWidth / 1600, innerHeight / 900);
+    film.style.transform = 'scale(' + (k > 0 ? k : 1) + ')';
+  }
+  addEventListener('resize', fit);
+  fit();
+
+  // ---------------------------------------------------------------- the picture
+  const head = el('div', 'f-head');
+  const title = el('div', 'f-title');
+  const clock = el('div', 'f-clock', '<span class="dial"><i class="hh"></i><i class="mm"></i></span><b class="tm"></b><span class="day"></span>');
+  head.append(title, el('span', 'f-tag', esc(STORY.tag)), clock);
+  const stages = el('div', 'f-stages');
+  STORY.stages.forEach((s) => stages.append(el('span', '', esc(s))));
+  const term = el('div', 'f-term');
+  term.innerHTML = '<div class="f-tbar"><i></i><i></i><i></i><b>' + esc(STORY.terminal) + '</b></div>';
+  const lines = el('div', 'f-lines');
+  term.append(lines);
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'f-links');
+  svg.setAttribute('viewBox', '0 0 1600 900');
+  const map = el('div', 'f-map');
+  const pb = el('div', 'f-pb');
+  pb.append(el('b', '', esc(STORY.playbook.title)));
+  STORY.playbook.chips.forEach((c) => {
+    if (c === '|') { pb.append(el('i', 'sep')); return; }
+    const chip = el('span', 'chip', he(c.t));
+    chip.dataset.id = c.id;
+    pb.append(chip);
+  });
+  const cap = el('div', 'f-cap out');
+  const card = el('div', 'f-card');
+  film.append(svg, map, head, stages, term, pb, cap, card);
+
+  // nodes at their places; links drawn from the side facing the session to the side facing away
+  const TERM = { x: 1600 - 70 - 640, y: 168, w: 640, h: 520 };
+  const PB = { y: 708 };
+  const nodes = {};
+  STORY.nodes.forEach((n) => {
+    const d = el('div', 'f-node k-' + n.kind, '<b>' + he(n.title) + '</b><span>' + he(n.sub) + '</span>');
+    Object.assign(d.style, { left: n.x + 'px', top: n.y + 'px', width: n.w + 'px' });
+    map.append(d);
+    nodes[n.id] = Object.assign({ el: d, sub: d.querySelector('span'), first: n.sub, h: 66 }, n);
+  });
+  STORY.labels.forEach((l) => {
+    const d = el('div', 'f-col-label', esc(l.t));
+    Object.assign(d.style, { left: l.x + 'px', top: l.y + 'px' });
+    map.append(d);
+  });
+  const links = {};
+  STORY.links.forEach(([a, b, kind]) => {
+    let d;
+    if (a === 'pb') {
+      const x = TERM.x + TERM.w / 2;
+      d = 'M' + x + ' ' + PB.y + ' L' + x + ' ' + (TERM.y + TERM.h);
+    } else {
+      const nb = nodes[b], na = nodes[a];
+      const p1 = a === 'term' ? [TERM.x, nb.y + nb.h / 2] : [na.x, na.y + na.h / 2];
+      const p2 = [nb.x + nb.w, nb.y + nb.h / 2];
+      const mx = (p1[0] + p2[0]) / 2;
+      d = 'M' + p1[0] + ' ' + p1[1] + ' C' + mx + ' ' + p1[1] + ' ' + mx + ' ' + p2[1] + ' ' + p2[0] + ' ' + p2[1];
+    }
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'k-' + kind);
+    svg.append(path);
+    links[a + '>' + b] = { d, path, kind };
+  });
+
+  // ---------------------------------------------------------------- moments
+  // INSTANT runs every delayed step at once: seeking to a moment replays everything before it without motion.
+  let INSTANT = false;
+  const timers = [];
+  const later = (ms, fn) => { if (INSTANT) fn(); else timers.push(setTimeout(fn, ms)); };
+  const stop = () => { timers.splice(0).forEach(clearTimeout); };
+  const nodeOn = new Set();
+  function settle() {
+    nodeOn.forEach((id) => { nodes[id].el.classList.remove('on'); nodes[id].el.classList.add('seen'); });
+    nodeOn.clear();
+    Object.values(links).forEach((l) => { if (l.path.classList.contains('on')) { l.path.classList.remove('on'); l.path.classList.add('seen'); } });
+    pb.classList.remove('on');
+    pb.querySelectorAll('.chip.on').forEach((c) => c.classList.remove('on'));
+  }
+  function setTitle(t) {
+    if (title.dataset.t === t) return;
+    title.dataset.t = t;
+    title.classList.add('out');
+    later(260, () => { title.innerHTML = he(t); title.classList.remove('out'); });
+  }
+  // one inner element: in the flex box each bare text run would be an item of its own and lose its edge spaces
+  function setCaption(t) {
+    cap.classList.add('out');
+    later(260, () => { cap.innerHTML = '<span>' + he(t) + '</span>'; cap.classList.toggle('out', !t); });
+  }
+  function setStage(i) {
+    [...stages.children].forEach((s, j) => { s.classList.toggle('on', j === i - 1); s.classList.toggle('done', j < i - 1); });
+  }
+  function addLine(kind, html) {
+    const line = el('div', 'f-line ' + (kind || ''), html);
+    lines.append(line);
+    while (lines.children.length > 16) lines.firstChild.remove();
+    if (INSTANT) line.classList.add('in');
+    else requestAnimationFrame(() => requestAnimationFrame(() => line.classList.add('in')));
+    return line;
+  }
+  function clearLines() { [...lines.children].forEach((l) => l.classList.remove('in')); later(380, () => { lines.innerHTML = ''; }); }
+  function packet(key, back) {
+    const l = links[key];
+    if (!l) throw new Error('no link ' + key);
+    l.path.classList.remove('seen');
+    l.path.classList.add('on');
+    if (INSTANT) return;
+    const dot = el('div', 'f-packet k-' + l.kind);
+    dot.style.offsetPath = "path('" + l.d + "')";
+    dot.style.offsetAnchor = '50% 50%';
+    film.append(dot);
+    const run = dot.animate([{ offsetDistance: back ? '100%' : '0%' }, { offsetDistance: back ? '0%' : '100%' }],
+                            { duration: 720, easing: 'cubic-bezier(.45,0,.55,1)', fill: 'forwards' });
+    run.onfinish = () => dot.remove();
+    // and a timer behind it: a page on virtual time, as in a headless screenshot, never finishes the animation
+    later(900, () => dot.remove());
+  }
+  function light(id, note) {
+    const n = nodes[id];
+    if (!n) throw new Error('no node ' + id);
+    n.el.classList.remove('seen');
+    n.el.classList.add('on');
+    nodeOn.add(id);
+    if (note) n.sub.innerHTML = he(note);
+  }
+  function lightAll(list) { (list || []).forEach((x) => light(x.node, x.note)); }
+
+  // The clock: a day of work in two minutes. Minutes count from midnight of the first day, so the hands keep turning
+  // forward through the night; a long jump spins for at most 2.2 s.
+  const tm = clock.querySelector('.tm'), dayEl = clock.querySelector('.day'), hh = clock.querySelector('.hh'), mm = clock.querySelector('.mm');
+  let clockAt = null;
+  const minutes = (t, day) => { const [h, m] = t.split(':').map(Number); return (day || 0) * 1440 + h * 60 + m; };
+  function showClock(v) {
+    const m = v % 1440;
+    tm.textContent = pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+    const next = v >= 1440;
+    dayEl.textContent = next ? STORY.clock.next : STORY.clock.today;
+    clock.classList.toggle('next', next);
+    hh.style.transform = 'rotate(' + v / 2 + 'deg)';
+    mm.style.transform = 'rotate(' + v * 6 + 'deg)';
+  }
+  function setClock(to) {
+    const from = clockAt === null ? to : clockAt;
+    clockAt = to;
+    if (to <= from) { showClock(to); return; }
+    const ms = Math.min(2200, Math.max(500, (to - from) * 6)), n = Math.max(1, Math.round(ms / 45));
+    for (let i = 1; i <= n; i++) later(i * ms / n, () => showClock(Math.round(from + (to - from) * i / n)));
+  }
+
+  // The story laid out in time once: each moment is [ms, what], and a beat returns where the next one starts.
+  // Typing is 55 ms a key, as a person types.
+  const KEY = 55;
+  const moments = [];
+  const at = (ms, fn) => moments.push([ms, fn]);
+  function beat(b, t) {
+    if (b.caption !== undefined) at(t, () => setCaption(b.caption));
+    if (b.time) at(t, () => setClock(minutes(b.time, b.day)));
+    if (b.type) {
+      const full = b.type;
+      let line;
+      at(t + 150, () => { line = addLine('cmd typing', '<span class="p">&gt; </span>'); });
+      [...full].forEach((_, i) => at(t + 400 + i * KEY, () => { line.innerHTML = '<span class="p">&gt; </span>' + esc(full.slice(0, i + 1)); }));
+      const end = t + 400 + full.length * KEY;
+      at(end + 250, () => { line.classList.remove('typing'); term.classList.add('busy'); });
+      return end + 650 + (b.wait || 0) * 1000;
+    }
+    if (b.out || b.say) {
+      at(t, () => {
+        const kind = b.say ? (b.kind || 'say') : (b.kind || '');
+        const mark = b.say ? '' : '<i class="mk" style="background:' + (b.mark || '#475569') + '"></i>';
+        addLine(kind, b.say ? he(b.say) : mark + esc(b.out));
+        if (b.to) packet(b.to, b.back);
+        later(b.to ? 520 : 0, () => { if (b.node) light(b.node, b.note); lightAll(b.also); });
+      });
+      return t + (b.wait !== undefined ? b.wait : 1.0) * 1000;
+    }
+    if (b.light) {
+      at(t, () => {
+        if (b.to) packet(b.to, b.back);
+        later(b.to ? 520 : 0, () => { light(b.light, b.note); lightAll(b.also); });
+      });
+      return t + (b.wait !== undefined ? b.wait : 1.0) * 1000;
+    }
+    if (b.pb) {
+      at(t, () => {
+        pb.classList.add('on');
+        (b.chips || []).forEach((id, i) => later(i * 220, () => {
+          const c = pb.querySelector('.chip[data-id="' + id + '"]');
+          if (!c) throw new Error('no chip ' + id);
+          c.classList.add('on');
+        }));
+        if (b.to) packet(b.to, b.back);
+        lightAll(b.also);
+      });
+      return t + (b.wait !== undefined ? b.wait : 1.2) * 1000;
+    }
+    return t + (b.wait || 0) * 1000;
+  }
+  let t = 300;
+  const starts = [];
+  const scenes = STORY.scenes.filter((sc) => !(DECK && sc.videoOnly));
+  scenes.forEach((sc) => {
+    const start = t;
+    starts.push([sc.title || (sc.card && sc.card.h), +(start / 1000).toFixed(2)]);
+    if (sc.card) {
+      at(start, () => {
+        // a line break in a card's title is the story's own: balancing alone split "בתיקיית העבודה" across lines
+        card.innerHTML = '<div class="bar"></div><h1>' + sc.card.h.split('\n').map(he).join('<br>') + '</h1>' + (sc.card.p ? '<p>' + he(sc.card.p) + '</p>' : '') +
+          (sc.card.cmds ? '<div class="cmds">' + sc.card.cmds.map((c) => '<code>' + esc(c) + '</code>').join('') + '</div>' : '');
+        card.classList.add('on');
+      });
+      t = start + sc.hold * 1000;
+      if (!sc.last) at(t - 600, () => card.classList.remove('on'));
+      return;
+    }
+    at(start, () => {
+      settle();
+      term.classList.remove('busy');
+      if (sc.clear) clearLines();
+      if (sc.title) setTitle(sc.title);
+      if (sc.stage) setStage(sc.stage);
+      if (sc.time) setClock(minutes(sc.time, sc.day));
+      setCaption(sc.caption || '');
+      if (sc.reset) sc.reset.forEach((id) => { nodes[id].sub.innerHTML = he(nodes[id].first); });
+    });
+    t = start + (sc.clear ? 600 : 300);
+    (sc.beats || []).forEach((b) => { t = beat(b, t); });
+    t += (sc.hold !== undefined ? sc.hold : 1.2) * 1000;
+  });
+  const LENGTH = t;
+  at(LENGTH, () => { window.FILM.done = true; report('done'); });
+  moments.sort((a, b) => a[0] - b[0]);
+  // where each scene starts, for whoever checks the film at a given moment
+  document.documentElement.dataset.timeline = JSON.stringify({ length: LENGTH / 1000, scenes: starts });
+
+  // ---------------------------------------------------------------- playing, and being told to
+  let state = 'loading';
+  function report(s) {
+    state = s;
+    if (window.parent !== window) window.parent.postMessage({ film: 'state', state: s, length: LENGTH / 1000 }, '*');
+  }
+  // every moment up to sec, at once and without motion
+  function seek(sec) {
+    stop();
+    INSTANT = true;
+    film.classList.add('still');
+    try { moments.forEach(([ms, fn]) => { if (ms <= sec * 1000) fn(); }); } finally { INSTANT = false; }
+    requestAnimationFrame(() => requestAnimationFrame(() => film.classList.remove('still')));
+  }
+  // In the deck the first frame is the first scene as it opens, with a cursor waiting in the terminal; a press plays
+  // the rest from there, so nothing jumps when it starts.
+  const READY = scenes.length && !scenes[0].card ? starts[0][1] : 0;
+  let cursor = null;
+  // the caption waits for the press too: while the presenter speaks, the frame carries no words of its own
+  function ready() {
+    seek(READY);
+    cap.classList.add('out');
+    cursor = addLine('cmd typing', '');
+    report('ready');
+  }
+  function play(from) {
+    if (cursor) { cursor.remove(); cursor = null; }
+    if (from > 0) cap.classList.toggle('out', !cap.textContent);
+    moments.forEach(([ms, fn]) => { if (ms > from * 1000) later(ms - from * 1000, fn); });
+    report('playing');
+  }
+  function end() {
+    if (cursor) { cursor.remove(); cursor = null; }
+    seek(LENGTH / 1000);
+    report('end');
+  }
+  addEventListener('message', (e) => {
+    const what = e.data && e.data.film;
+    if (what === 'play' && state === 'ready') play(READY);
+    else if (what === 'end' && state !== 'end' && state !== 'done') end();
+    else if (what === 'ready' && state !== 'ready') location.reload();
+  });
+
+  window.FILM = { length: LENGTH / 1000, done: false, play: () => play(0), seek, end };
+  showClock(minutes(STORY.clock.start));
+  if (STILL !== undefined) { seek(+STILL); report('still'); }
+  else if (DECK) {
+    ready();
+    // the deck answers with what its slide wants: still at the start, playing, or at the end
+    if (window.parent !== window) window.parent.postMessage({ film: 'hello', length: LENGTH / 1000 }, '*');
+  } else if (!REC) setTimeout(() => window.FILM.play(), 900);
+})();
+
+</script>
+</body>
+</html>

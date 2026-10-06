@@ -1,0 +1,1471 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>לעבוד נכון עם AI בפיתוח</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+  :root{
+    --navy:#0B1220; --navy2:#121B2E; --teal:#14B8A6; --teal-light:#5EEAD4; --teal-dark:#0F766E;
+    --gold:#F59E0B; --purple:#9333EA; --purple-light:#C084FC; --pink:#DB2777; --red:#EF4444; --red-box:#DC2626; --red-dark:#B91C1C;
+    --blue-box:#2563EB; --ink:#0F172A; --muted:#475569; --card:#F1F5F9; --line:#E2E8F0; --white:#FFFFFF;
+    --ease:cubic-bezier(0.16, 1, 0.3, 1);
+    --mono:"Cascadia Code", Consolas, "Courier New", monospace;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; overflow:hidden; background:var(--navy); }
+  body{ font-family:'Rubik', 'Segoe UI', Arial, sans-serif; color:var(--ink); -webkit-font-smoothing:antialiased; }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:.01ms !important; transition-duration:.01ms !important; } }
+
+  /* one 1600 x 900 canvas, scaled to the window, so every screen breaks the lines the same way */
+  #stage{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  #deck{ position:relative; width:1600px; height:900px; flex:0 0 auto; overflow:hidden; background:var(--white); }
+
+  .slide{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-start; padding:104px 112px 92px;
+          opacity:0; pointer-events:none; transform:translateY(24px) scale(.98); background:var(--white); overflow:hidden;
+          transition:opacity .7s var(--ease), transform .7s var(--ease); }
+  .slide.dark{ background:var(--navy); color:var(--white); }
+  /* the cover, the cold open, the questions and the part dividers stand in the middle */
+  .slide:has(> .divider), .slide:has(> .hero-line), .slide:has(> .cold-q){ justify-content:center; padding-top:78px; }
+  .slide.active{ opacity:1; pointer-events:auto; transform:none; z-index:2; }
+  /* no part shrinks to make a full slide fit: it would overlap the next part instead of showing as overflow */
+  .slide > *{ position:relative; z-index:1; flex-shrink:0; }
+  .slide > .blob{ position:absolute; z-index:0; border-radius:50%; pointer-events:none; }
+  /* elements move in only when the script runs; without it the first slide shows complete */
+  .js .reveal{ opacity:0; transform:translateY(22px); transition:opacity .8s var(--ease), transform .8s var(--ease); }
+  .active .reveal.show{ opacity:1; transform:none; }
+  /* a part shown one press at a time */
+  .js [data-step]{ opacity:0; transform:translateY(14px); transition:opacity .5s var(--ease), transform .5s var(--ease); }
+  .js [data-step].on{ opacity:1; transform:none; }
+  .js .bar span[data-step]{ transform:none; transition:opacity .45s var(--ease); }
+
+  .kicker{ font-size:20px; font-weight:700; letter-spacing:.04em; color:var(--teal-dark); margin-bottom:10px; }
+  /* above the title, so a slide with a kicker keeps its title at the same height as the others */
+  .slide > .kicker{ position:absolute; top:62px; right:112px; margin:0; }
+  .dark .kicker{ color:var(--teal-light); }
+  .title-lg{ font-size:48px; font-weight:800; line-height:1.15; letter-spacing:-.01em; }
+  .dark .title-lg{ color:var(--white); }
+  .title-hero{ font-size:88px; font-weight:900; line-height:1.1; letter-spacing:-.02em; }
+  .lead{ font-size:26px; color:var(--muted); margin-top:12px; line-height:1.45; }
+  .dark .lead{ color:#CBD5E1; }
+  .hero-line{ overflow:hidden; padding-bottom:8px; }
+  .hero-line span{ display:inline-block; }
+  .js .hero-line span{ transform:translateY(110%); transition:transform 1s var(--ease); }
+  .active .hero-line span{ transform:none; }
+  .hero-sub{ font-size:30px; margin-top:8px; }
+  .tagline{ margin-top:38px; display:flex; align-items:center; gap:14px; }
+  .tagline i{ width:60px; height:3px; background:var(--teal); border-radius:2px; }
+  .tagline span{ color:var(--gold); font-weight:700; font-size:22px; }
+  code{ font-family:var(--mono); direction:ltr; unicode-bidi:isolate; font-size:.92em; font-weight:600; }
+  b{ font-weight:700; }
+  /* no paragraph ends on a single word, and a two-line title splits evenly (Chromium 117 and later) */
+  .slide p, .slide li, .slide h3, .slide h4, .slide .cmp, .slide .step span, .slide .q span, .callout span, .ask, .alert span{ text-wrap:pretty; }
+  .title-lg, .dv-title, .lead{ text-wrap:balance; }
+  .red{ color:var(--red-dark); }
+  .muted{ color:var(--muted); }
+
+  /* the three parts, top left: where we are */
+  .slide > .tracker{ position:absolute; top:30px; left:44px; display:flex; gap:6px; z-index:3; }
+  .tracker span{ min-width:160px; padding:5px 14px; border-radius:999px; font-size:16px; text-align:center;
+                 background:var(--card); color:var(--muted); border:1px solid var(--line); }
+  .tracker span.on{ font-weight:700; border-color:transparent; }
+  .dark .tracker span{ background:var(--navy2); color:#94A3B8; border-color:#1F2B45; }
+  .dark .tracker span.on{ border-color:transparent; }
+
+  /* a term, defined where it first appears */
+  .term{ display:flex; align-items:center; gap:16px; margin-top:20px; font-size:24px; }
+  .term .tag{ background:var(--teal); color:var(--navy); font-weight:700; font-size:17px; padding:5px 13px; border-radius:999px; flex:0 0 auto; }
+  .term b{ flex:0 0 auto; }
+  .term .m{ color:#334155; }
+  .dark .term .m{ color:#CBD5E1; }
+
+  .badge{ width:50px; height:50px; border-radius:13px; display:inline-flex; align-items:center; justify-content:center;
+          font-weight:800; font-size:22px; flex:0 0 auto; }
+  .badge.round{ border-radius:50%; }
+  .badge.small{ width:34px; height:34px; font-size:16px; }
+
+  /* cards */
+  .twocol{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:28px; }
+  .twocol.tight{ margin-top:22px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:20px; padding:24px 32px; }
+  .card.tint{ background:#ECFEFF; border-color:#CFFAFE; }
+  .card.warn{ background:#FEF2F2; border-color:#FECACA; }
+  .card-label{ font-weight:700; font-size:21px; margin-bottom:12px; color:var(--muted); }
+  .card.tint .card-label{ color:var(--teal-dark); }
+  .card.warn .card-label, .card-label.red{ color:var(--red-dark); }
+  .card.head .card-label{ font-size:28px; color:var(--ink); }
+  .card.warn.head .card-label{ color:var(--red-dark); }
+  .card ul{ list-style:none; }
+  .card li{ position:relative; padding-right:26px; margin-bottom:10px; font-size:26px; line-height:1.4; }
+  .card li:last-child{ margin-bottom:0; }
+  .card li::before{ content:''; position:absolute; right:2px; top:16px; width:8px; height:8px; border-radius:50%; background:var(--muted); }
+  .card.tint li::before{ background:var(--teal); }
+  .card.warn li::before{ background:var(--red); }
+  .card p{ font-size:26px; line-height:1.45; margin-bottom:8px; }
+  .card p:last-child{ margin-bottom:0; }
+  .card p.src{ font-size:20px; color:var(--muted); margin-bottom:2px; }
+  .essence{ grid-template-columns:1.1fr 1fr; }
+  .essence .card.big p{ font-size:27px; }
+  .essence .card.quiet li{ font-size:22px; }
+
+  /* the line to take away */
+  .callout{ margin-top:28px; padding:20px 30px; border-radius:16px; background:var(--navy); color:var(--gold); font-weight:700;
+            font-size:28px; line-height:1.4; display:flex; align-items:center; gap:18px; }
+  .callout .ours{ background:var(--teal); color:var(--navy); font-size:18px; padding:5px 14px; border-radius:999px; flex:0 0 auto; }
+  /* the same line turned to the audience: what it means in their project */
+  .callout .ours.you{ background:var(--gold); }
+  .ask{ margin-top:28px; background:var(--navy); border-right:8px solid var(--teal); border-radius:16px; padding:20px 30px; font-size:30px;
+        font-weight:700; color:#fff; }
+  .caption{ margin-top:10px; font-size:20px; color:var(--muted); }
+  .center{ text-align:center; }
+
+  /* the map */
+  .rows{ margin-top:26px; display:flex; flex-direction:column; gap:14px; }
+  .row{ display:flex; align-items:center; gap:22px; background:var(--card); border-radius:18px; padding:20px 26px; }
+  .row h3{ font-size:28px; font-weight:700; min-width:260px; }
+  .row p{ font-size:24px; color:#334155; }
+
+  /* the cold open: the question comes once the result is typed */
+  .cold-q{ font-size:76px; font-weight:900; color:#fff; margin-top:44px; letter-spacing:-.02em; }
+  /* the case */
+  .case-line{ margin-top:22px; font-size:26px; color:#E2E8F0; }
+  .terminal{ margin-top:16px; align-self:flex-start; background:#0F172A; border:1px solid #23314F; border-radius:16px; padding:16px 26px 18px; min-width:760px; }
+  .terminal .dots{ display:flex; gap:7px; margin-bottom:10px; }
+  .terminal .dots i{ width:11px; height:11px; border-radius:50%; background:#334155; }
+  .terminal code{ font-size:30px; color:#7EE787; font-weight:600; white-space:pre; }
+  .terminal.big{ margin-top:22px; min-width:900px; padding:20px 30px 24px; }
+  .terminal.big code{ font-size:38px; }
+  .typeout.typing::after{ content:''; display:inline-block; width:.55em; height:.9em; margin-left:6px; background:#7EE787;
+                          vertical-align:-.08em; animation:blink .8s steps(1) infinite; }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  /* part dividers */
+  .divider{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:40px; }
+  .dv-text{ max-width:940px; }
+  .eyebrow{ font-weight:700; font-size:22px; letter-spacing:.1em; }
+  .dv-title{ font-size:72px; font-weight:900; color:#fff; line-height:1.1; margin-top:6px; }
+  .dv-label{ margin-top:34px; font-size:22px; font-weight:700; color:var(--gold); }
+  .dv-list{ list-style:none; margin-top:12px; }
+  .dv-list li{ position:relative; padding-right:28px; font-size:27px; line-height:1.45; margin-bottom:8px; color:#E2E8F0; }
+  .dv-list li::before{ content:''; position:absolute; right:4px; top:17px; width:8px; height:8px; border-radius:50%; background:var(--teal); }
+  .dv-num{ font-size:260px; font-weight:900; line-height:.9; letter-spacing:-.04em; }
+  .route{ display:flex; gap:10px; margin-top:40px; }
+  .route span{ flex:1; text-align:center; padding:12px; border-radius:14px; background:var(--navy2); color:#94A3B8; font-size:19px; font-weight:500; }
+  .route span b{ font-weight:500; }
+  .route span.on b{ font-weight:700; }
+  .route small{ display:block; font-size:14px; font-weight:500; opacity:.8; margin-bottom:2px; }
+
+  /* the context window as one bar */
+  .bar{ display:flex; height:88px; border-radius:16px; overflow:hidden; margin-top:24px; background:var(--card); }
+  .bar span{ display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; border-left:2px solid #fff; }
+  .bar span:last-child{ border-left:0; }
+
+  /* the agent's loop */
+  .loop{ margin-top:24px; }
+  .loop-row{ display:flex; align-items:center; gap:12px; }
+  .lbox{ flex:1; height:118px; border-radius:18px; padding:14px 20px; display:flex; flex-direction:column; justify-content:space-between;
+         box-shadow:0 16px 32px -14px rgba(0,0,0,.3); }
+  .lbox .num{ font-size:24px; font-weight:900; }
+  .lbox .t{ font-size:25px; font-weight:700; }
+  .loop-back{ display:block; width:100%; height:40px; margin-top:6px; overflow:visible; }
+  /* the way back: a gold track with dashes running along it, brighter while the dot runs */
+  .track-svg{ overflow:visible; }
+  .track-svg .track{ fill:none; stroke:var(--gold); stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; opacity:.75; transition:opacity .3s, stroke-width .3s; }
+  .track-svg .head{ fill:none; stroke:var(--gold); stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; opacity:.75; }
+  .active .track-svg .track{ stroke-dasharray:10 9; animation:march .7s linear infinite; }
+  .track-svg.returning .track, .track-svg.returning .head{ opacity:1; stroke-width:4.5; }
+  .track-svg .runner{ fill:var(--gold); opacity:0; filter:drop-shadow(0 0 7px rgba(245,158,11,.9)); }
+  .track-svg .runner.on{ opacity:1; }
+  @keyframes march{ from{ stroke-dashoffset:19; } to{ stroke-dashoffset:0; } }
+  /* the station the agent is on: lifted, ringed in gold; the others wait, dimmed */
+  .lbox{ transition:transform .4s var(--ease), box-shadow .4s ease, opacity .4s ease; }
+  .loop.running .lbox{ opacity:.42; }
+  .loop .lbox.lit{ opacity:1; transform:translateY(-8px) scale(1.05);
+                   box-shadow:0 0 0 4px #fff, 0 0 0 9px rgba(245,158,11,.55), 0 26px 40px -14px rgba(0,0,0,.45); }
+  .loop-row .chev{ transition:border-color .3s, transform .3s; }
+  .loop-row .chev-wrap.lit .chev{ border-color:var(--gold); transform:rotate(45deg) scale(1.45); }
+  /* stopped by a press: the warning comes forward and pulses twice */
+  .alert{ transition:box-shadow .4s ease, border-color .4s ease, transform .4s var(--ease); }
+  .alert.emph{ border-color:#F87171; transform:scale(1.02); box-shadow:0 0 0 5px rgba(220,38,38,.16); animation:pulse-red 1s ease 2; }
+  @keyframes pulse-red{ 50%{ box-shadow:0 0 0 12px rgba(220,38,38,.24); } }
+  .alert{ margin-top:16px; background:#FEF2F2; border:1px solid #FECACA; border-radius:18px; padding:16px 26px; display:flex; flex-direction:column; gap:4px; }
+  .alert b{ font-size:30px; color:var(--red-dark); }
+  .alert span{ font-size:25px; }
+
+  .chev-wrap{ display:flex; align-items:center; justify-content:center; flex:0 0 auto; width:22px; }
+  .chev{ display:block; width:14px; height:14px; border-left:2.5px solid #94A3B8; border-bottom:2.5px solid #94A3B8; transform:rotate(45deg); }
+  .arr{ width:40px; height:14px; flex:0 0 auto; }
+
+  /* the case */
+  .big-num{ font-size:38px; font-weight:800; line-height:1.25; }
+  .card p.big-num.red{ color:var(--red-dark); font-size:30px; margin-bottom:2px; }
+  .explain{ margin-top:12px; }
+  .explain p{ font-size:21px; line-height:1.45; }
+  /* slide 10 holds the most: the numbers stay large, the space around them shrinks */
+  .twocol.tight .card{ padding:18px 28px; }
+  .twocol.tight .big-num{ font-size:34px; }
+  .twocol.tight .card p.big-num.red{ font-size:28px; }
+  .explain + .callout{ margin-top:18px; }
+  .types{ display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; margin-top:18px; }
+  .type{ background:#fff; border:2px solid var(--line); border-radius:18px; padding:16px 20px; }
+  /* the gap: 1142 of 1194 ran */
+  .gap{ margin-top:14px; }
+  .gap-bar{ display:flex; height:16px; border-radius:999px; overflow:hidden; background:var(--card); }
+  .gap-bar .ran{ background:#16A34A; transform-origin:right; }
+  .gap-bar .miss{ background:var(--red-box); }
+  .active .gap-bar .ran{ animation:grow 1.3s var(--ease) both .7s; }
+  .active .gap-bar .miss{ animation:fade-in .4s ease both 2.1s, glow 1s ease 2.6s 2; }
+  @keyframes grow{ from{ transform:scaleX(0); } to{ transform:none; } }
+  @keyframes fade-in{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes glow{ 50%{ filter:brightness(1.45); } }
+  .gap-labels{ display:flex; justify-content:space-between; font-size:18px; margin-top:6px; color:var(--muted); }
+  .gap-labels .m{ color:var(--red-dark); font-weight:700; }
+  .type i{ display:block; width:22px; height:22px; border-radius:50%; margin-bottom:10px; }
+  .type h4{ font-size:23px; font-weight:700; }
+  .type p{ font-size:20px; color:var(--muted); margin-top:2px; }
+  .type.hot{ border-color:#FCA5A5; background:#FEF2F2; }
+  .types.big{ margin:40px 0 14px; gap:28px; }
+  .types.big .type{ padding:48px 26px; text-align:center; }
+  .types.big .type i{ width:34px; height:34px; margin:0 auto 22px; }
+  .types.big .type h4{ font-size:32px; }
+  .types.big .type p{ font-size:26px; margin-top:10px; }
+  /* how the fault happened: terminals on the right, the shared folder, the two copies on the left */
+  .mech{ position:relative; height:230px; margin-top:12px; direction:ltr; }
+  .mech-tag{ position:absolute; top:34px; left:560px; width:300px; text-align:center; font-size:18px; color:var(--muted); direction:rtl; }
+  .m-lines{ position:absolute; inset:0; width:1376px; height:230px; overflow:visible; pointer-events:none; }
+  .m-lines path{ fill:none; stroke-width:3; transition:stroke .4s, stroke-width .4s, opacity .4s; }
+  .m-lines .l-term{ stroke:#94A3B8; }
+  .m-lines .l-task{ stroke:var(--teal); stroke-width:4; }
+  .m-lines .l-other{ stroke:#CBD5E1; stroke-dasharray:7 7; }
+  .mech.moved .l-task{ stroke:#CBD5E1; stroke-width:3; stroke-dasharray:7 7; }
+  .mech.moved .l-other{ stroke:var(--red-box); stroke-width:4; stroke-dasharray:none; }
+  .mech.moved .l-term{ stroke:var(--red-box); }
+  .m-term, .m-shared, .m-copy{ position:absolute; height:100px; border-radius:16px; transition:border-color .4s, opacity .4s, box-shadow .4s, transform .4s var(--ease); }
+  .m-term{ left:1046px; width:330px; background:#0F172A; border:1px solid #23314F; padding:10px 16px; }
+  .t-bash{ top:0; } .t-ps{ top:130px; }
+  .tbar{ display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+  .tbar i{ width:9px; height:9px; border-radius:50%; background:#334155; }
+  .tbar b{ margin-left:8px; font-family:var(--mono); font-size:15px; color:#94A3B8; font-weight:600; }
+  .m-term code{ display:block; font-size:20px; color:#E6EDF3; white-space:pre; }
+  .m-term .p{ color:#64748B; }
+  .m-term .out{ color:#7EE787; opacity:0; transition:opacity .4s; margin-top:2px; }
+  .mech.ran .m-term .out{ opacity:1; }
+  .m-shared{ left:560px; top:65px; width:300px; background:#fff; border:2px solid var(--navy); padding:14px 18px; direction:rtl;
+             display:flex; flex-direction:column; justify-content:center; gap:6px; text-align:center; }
+  .m-shared b{ font-size:22px; }
+  .m-shared .where{ font-size:20px; font-weight:700; color:var(--teal-dark); }
+  .m-shared .w2{ display:none; color:var(--red-dark); }
+  .mech.moved .m-shared .w1{ display:none; }
+  .mech.moved .m-shared .w2{ display:inline; }
+  .mech.moved .m-shared{ border-color:var(--red-box); box-shadow:0 0 0 5px rgba(220,38,38,.14); animation:pulse-red 1s ease 2; }
+  .m-term .cmd.typing::after{ content:''; display:inline-block; width:.55em; height:.95em; margin-left:2px; background:#E6EDF3;
+                              vertical-align:-.12em; animation:blink .8s steps(1) infinite; }
+  .m-copy{ left:0; width:380px; background:var(--card); border:2px solid var(--line); padding:12px 18px; direction:rtl;
+           display:flex; flex-direction:column; justify-content:center; gap:3px; }
+  .m-copy b{ font-size:22px; }
+  .m-copy span{ font-size:19px; color:var(--muted); }
+  .m-copy .tag{ font-style:normal; font-size:17px; font-weight:700; opacity:0; transition:opacity .4s; }
+  .c-task{ top:0; border-color:var(--teal); background:#ECFEFF; }
+  .c-other{ top:130px; opacity:.6; }
+  .mech.moved .c-task{ opacity:.55; border-color:var(--line); background:var(--card); }
+  .mech.moved .c-other{ opacity:1; border-color:var(--red-box); background:#FEF2F2; }
+  .mech.ran .c-task{ opacity:1; border-color:var(--red-box); }
+  .mech.ran .c-task .tag{ opacity:1; color:var(--red-dark); }
+  .mech.ran .c-other .tag{ opacity:1; color:#15803D; }
+  .type.hot h4{ color:var(--red-dark); }
+
+  /* instead of, better */
+  .compare{ margin-top:22px; display:flex; flex-direction:column; gap:14px; }
+  .cmp-head, .cmp-row{ display:grid; grid-template-columns:5fr 22px 8fr; align-items:center; gap:14px; }
+  .cmp-head span{ font-size:21px; font-weight:700; }
+  .cmp-head .bad{ color:var(--red-dark); }
+  .cmp-head .good{ color:var(--teal-dark); }
+  .cmp{ border-radius:16px; padding:16px 24px; font-size:24px; line-height:1.4; min-height:84px; display:flex; align-items:center; }
+  .cmp.bad{ background:#FEF2F2; border:1px solid #FECACA; }
+  .cmp.good{ background:#ECFEFF; border:1px solid #A5F3FC; }
+
+  .grid4{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:26px; }
+  .ncard{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px 24px; display:flex; gap:18px; align-items:flex-start; }
+  .ncard h4{ font-size:27px; font-weight:700; }
+  .ncard p{ font-size:23px; color:var(--muted); margin-top:4px; }
+  .ncard p.stat{ color:var(--teal-dark); font-weight:500; }
+  .ncard p.stat b{ font-variant-numeric:tabular-nums; }
+
+  .mistakes{ margin-top:22px; display:flex; flex-direction:column; gap:10px; }
+  .m-head, .m-row{ display:grid; grid-template-columns:44px 290px 1fr 1fr; gap:18px; align-items:center; }
+  .m-head{ padding:0 18px; }
+  .m-head span{ font-size:20px; font-weight:700; color:var(--muted); }
+  .m-head .fix{ color:var(--teal-dark); }
+  .m-row{ background:var(--card); border-radius:14px; padding:13px 18px; }
+  .m-row .badge{ width:42px; height:42px; font-size:19px; }
+  .m-row b{ font-size:24px; }
+  .m-row span{ font-size:22px; }
+  .m-row .fix{ color:var(--teal-dark); font-weight:500; }
+
+  /* the playbook */
+  .pb{ display:grid; grid-template-columns:1.5fr 66px 1fr 66px 1.5fr; gap:10px; margin-top:22px; align-items:stretch; }
+  .pb .card{ padding:18px 22px; }
+  .pb > .chev-wrap{ align-self:center; }
+  .pb-label{ font-size:19px; color:var(--muted); }
+  .pb-name{ font-size:25px; font-weight:700; margin:4px 0 10px; }
+  .pb-name.red{ color:var(--red-dark); }
+  .pb-title{ font-size:28px; font-weight:800; margin-bottom:8px; }
+  .pb-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; border-top:1px solid var(--line); padding:9px 0; font-size:21px; }
+  .pb-row.thin{ padding:6px 0; }
+  .pb-row code{ font-size:18px; color:var(--muted); font-weight:500; white-space:pre; }
+  .tool p{ font-size:22px; line-height:1.4; margin-bottom:10px; }
+  .pb-back{ display:block; width:100%; height:40px; margin-top:4px; }
+  /* between the columns: a teal arrow whose dashes run left, and a packet that crosses it */
+  .flow-gap{ position:relative; display:flex; align-items:center; justify-content:center; }
+  .gtrack{ width:66px; height:16px; overflow:visible; }
+  .gtrack .dash{ fill:none; stroke:var(--teal); stroke-width:3.5; stroke-linecap:round; stroke-dasharray:7 6; }
+  .active .gtrack .dash{ animation:march-gap .55s linear infinite; }
+  .gtrack .head{ fill:none; stroke:var(--teal); stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; }
+  @keyframes march-gap{ from{ stroke-dashoffset:13; } to{ stroke-dashoffset:0; } }
+  .packet{ position:absolute; top:50%; left:50%; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%;
+           background:var(--teal); box-shadow:0 0 0 3px #fff, 0 0 14px 4px rgba(20,184,166,.6); opacity:0; pointer-events:none; }
+  /* the column the flow is in */
+  .pb-col{ transition:box-shadow .4s ease, transform .4s var(--ease), border-color .4s; }
+  .pb-col.glow{ transform:translateY(-4px); border-color:var(--teal); box-shadow:0 0 0 4px rgba(20,184,166,.28), 0 22px 36px -16px rgba(0,0,0,.28); }
+  .pb-col.tool.glow{ border-color:var(--gold); box-shadow:0 0 0 4px rgba(245,158,11,.28), 0 22px 36px -16px rgba(0,0,0,.28); }
+  .flows{ margin-top:4px; display:flex; flex-direction:column; gap:6px; }
+  .flows p{ display:flex; align-items:center; gap:12px; font-size:22px; }
+
+  /* the film: its own page fills the slide, and the deck's dots and bar step aside while it is on */
+  .slide.film{ padding:0; }
+  .slide > .film-wrap{ position:absolute; inset:0; z-index:1; }
+  /* no pointer and no focus: a click or a key in the film would stay in its page and never reach the deck */
+  .film-wrap iframe{ display:block; width:1600px; height:900px; border:0; background:var(--navy); pointer-events:none; }
+  .slide.film .pagenum{ display:none; }
+  #progress-track, #dots{ transition:opacity .4s ease; }
+  #deck.film-on #progress-track, #deck.film-on #dots{ opacity:0; pointer-events:none; }
+  .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+  /* a working day */
+  .flow{ display:flex; gap:8px; margin-top:30px; align-items:flex-start; }
+  .station{ flex:1; min-width:0; display:flex; flex-direction:column; gap:12px; }
+  .sbox{ border-radius:18px; padding:14px 16px; height:150px; display:flex; flex-direction:column; justify-content:space-between;
+         box-shadow:0 16px 30px -14px rgba(0,0,0,.3); }
+  .sbox .num{ font-size:24px; font-weight:900; }
+  .sbox .t{ display:block; font-size:22px; font-weight:700; }
+  .sbox code{ display:block; font-size:17px; margin-top:2px; text-align:right; }
+  .sbox .uses{ display:block; font-size:15px; opacity:.9; margin-top:2px; }
+  .rule, .why{ font-size:21px; line-height:1.4; padding:0 4px; }
+  .rule small, .why small{ display:block; font-size:17px; font-weight:700; margin-bottom:3px; }
+  .rule small{ color:var(--teal-dark); }
+  .why{ background:var(--card); border-radius:12px; padding:10px 12px; color:var(--ink); font-size:20px; min-height:112px; }
+  .why small{ color:var(--red-dark); }
+  /* a command never breaks in the middle */
+  .rule code, .why code{ white-space:nowrap; }
+  .flow > .chev-wrap{ margin-top:66px; }
+
+  .four{ display:grid; grid-template-columns:repeat(4, 1fr); gap:18px; margin-top:24px; align-items:stretch; }
+  .four .card{ padding:20px 22px; }
+  .four h4{ font-size:27px; font-weight:700; margin-bottom:10px; }
+  .four p{ font-size:22px; line-height:1.4; }
+  .four p.muted{ font-size:20px; }
+  .four p.small{ font-size:19px; }
+  /* what the slide meant, as large as what it showed */
+  .four p.meant{ font-size:22px; font-weight:700; color:var(--teal-dark); margin-top:4px; }
+  .four p.meant code{ font-size:1.1em; }
+  .bug{ display:block; width:100%; border:2px solid #FCA5A5; border-radius:8px; background:#fff; margin:8px 0 6px; }
+  /* /start-task flips into ksat-trats/, letter by letter, then the real screenshot appears */
+  .flip{ display:flex; justify-content:flex-end; font-family:var(--mono); font-weight:700; font-size:30px; margin:10px 0 2px; color:var(--ink); }
+  .flip span{ display:inline-block; white-space:pre; transition:transform .55s var(--ease) calc(var(--i) * 45ms), color .4s ease calc(var(--i) * 45ms); }
+  .flip.flipped span{ transform:translateX(calc(var(--d) * 1ch)); color:var(--red-dark); }
+  .js .bug{ opacity:0; transition:opacity .6s ease .9s; }
+  .flip.flipped ~ .bug{ opacity:1; }
+
+  .habits{ margin-top:30px; display:flex; flex-direction:column; gap:20px; }
+  .habit{ display:flex; align-items:center; gap:22px; }
+  .habit .badge{ width:58px; height:58px; font-size:25px; }
+  .habit h3{ font-size:33px; font-weight:700; color:#fff; line-height:1.3; }
+  .habit.key h3{ font-size:38px; color:var(--gold); }
+  .habit p{ font-size:24px; color:#CBD5E1; margin-top:2px; }
+
+  .start{ margin-top:24px; display:flex; flex-direction:column; gap:20px; }
+  .srow{ display:flex; gap:20px; align-items:flex-start; }
+  .srow > div{ flex:1; }
+  .srow h3{ font-size:28px; font-weight:700; }
+  .srow p{ font-size:23px; color:var(--muted); margin-top:2px; }
+  .chips{ display:flex; gap:16px; margin-top:10px; }
+  .chip{ background:#0F172A; color:#E6EDF3; border-radius:12px; padding:12px 20px; font-size:22px; font-weight:600; }
+  .chip.wide{ display:block; width:100%; text-align:left; }
+  .chips.three .chip{ flex:1; text-align:center; }
+  /* a muted line beside a chip, read with it */
+  .chips .chip-note{ align-self:center; color:var(--muted); font-size:22px; }
+  /* an example rule, in Hebrew, under a step */
+  .srow .quote{ margin-top:10px; background:var(--card); border-right:4px solid var(--gold); border-radius:10px; padding:10px 18px;
+                font-size:24px; color:var(--ink); }
+  .last-q{ margin-top:30px; font-size:40px; font-weight:700; color:var(--gold); }
+
+  .gloss{ display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin-top:22px; }
+  .g{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 20px; }
+  .g h4{ font-size:22px; font-weight:700; color:var(--teal-dark); }
+  .g p{ font-size:19px; margin-top:4px; }
+  .faq{ display:flex; flex-direction:column; gap:12px; margin-top:22px; }
+  .qa{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 24px; }
+  .qa h4{ font-size:23px; font-weight:700; color:var(--teal-dark); }
+  .qa p{ font-size:21px; margin-top:4px; }
+
+  /* furniture */
+  .slide > .pagenum{ position:absolute; bottom:32px; left:44px; font-size:14px; color:#94A3B8; font-weight:500; font-variant-numeric:tabular-nums; }
+  #progress-track{ position:absolute; top:0; right:0; left:0; height:4px; background:rgba(148,163,184,.25); z-index:10; }
+  #progress-bar{ height:100%; width:0; background:linear-gradient(90deg, var(--teal), var(--gold)); transition:width .5s var(--ease); }
+  #dots{ position:absolute; bottom:26px; right:50%; transform:translateX(50%); display:flex; gap:7px; z-index:10; }
+  .dot{ width:7px; height:7px; border-radius:50%; background:rgba(148,163,184,.45); cursor:pointer; transition:all .35s var(--ease); }
+  .dot.active{ background:var(--teal); width:22px; border-radius:5px; }
+  #ui{ position:fixed; bottom:18px; right:18px; display:flex; gap:8px; z-index:50; opacity:0; pointer-events:none; transition:opacity .25s; }
+  body.ui #ui{ opacity:1; pointer-events:auto; }
+  #ui button{ background:rgba(255,255,255,.08); color:#94A3B8; border:1px solid rgba(148,163,184,.3); border-radius:10px; padding:8px 12px;
+              font:500 13px Rubik, sans-serif; cursor:pointer; backdrop-filter:blur(6px); }
+  #ui button:hover{ color:#fff; }
+  #blank{ position:fixed; inset:0; background:#000; z-index:60; display:none; }
+  /* the laser pointer: a red dot that follows the mouse, visible in a screen share */
+  #laser{ position:fixed; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%; background:#EF4444;
+          box-shadow:0 0 14px 5px rgba(239,68,68,.6); pointer-events:none; z-index:80; display:none; left:-40px; top:-40px; }
+  body.laser #laser{ display:block; }
+  body.laser, body.laser *{ cursor:none !important; }
+  body.zoommode #deck, body.zoommode #deck *{ cursor:zoom-in !important; }
+  body.zoomed #deck, body.zoomed #deck *{ cursor:zoom-out !important; }
+  .toast{ position:fixed; bottom:70px; left:50%; transform:translateX(-50%); background:#121B2E; color:#E2E8F0; border:1px solid #1F2B45;
+          border-radius:12px; padding:12px 18px; font:500 15px Rubik, sans-serif; z-index:70; }
+  body.blank #blank{ display:block; }
+
+  /* modes: no motion for screenshots and printing; a bare preview inside the presenter window */
+  .static .slide, .static .reveal, .static .hero-line span{ transition:none !important; }
+  .static .reveal{ opacity:1 !important; transform:none !important; }
+  .static .hero-line span{ transform:none !important; }
+  .static [data-step]{ opacity:1 !important; transform:none !important; }
+  .static .bug{ opacity:1; }
+  .static .gap-bar span, .static .flip span, .static .gtrack .dash, .static .track-svg .track{ animation:none !important; transition:none !important; }
+  .static .track-svg .track{ stroke-dasharray:none; }
+  .static .alert{ animation:none !important; }
+  .static .mech *, .static .mech{ transition:none !important; animation:none !important; }
+  .embed #dots, .embed #progress-track, .embed #ui{ display:none; }
+
+  /* the presenter window */
+  #presenter{ display:none; }
+  body.presenter{ overflow:auto; background:#0B1220; color:#E2E8F0; }
+  body.presenter #stage, body.presenter #ui{ display:none; }
+  body.presenter #presenter{ display:grid; grid-template-columns:1.2fr 1fr; grid-template-rows:auto 1fr; gap:14px; height:100vh; padding:14px; }
+  .p-top{ grid-column:1 / -1; display:flex; align-items:center; gap:16px; background:#121B2E; border-radius:14px; padding:10px 16px; flex-wrap:wrap; }
+  .p-top .count{ font-weight:800; font-size:20px; color:#5EEAD4; font-variant-numeric:tabular-nums; }
+  .p-top .ttl{ font-weight:700; font-size:20px; flex:1; min-width:200px; }
+  .p-top .clock{ font-variant-numeric:tabular-nums; font-size:28px; font-weight:800; min-width:90px; text-align:center; }
+  .p-top .plan{ font-size:15px; color:#94A3B8; }
+  .p-top .late{ color:#F87171; }
+  .p-top .early{ color:#5EEAD4; }
+  .p-top button{ background:#1F2B45; color:#E2E8F0; border:0; border-radius:10px; padding:8px 14px; font:600 14px Rubik, sans-serif; cursor:pointer; }
+  .p-top button:hover{ background:#2B3A5C; }
+  .p-notes{ overflow:auto; background:#121B2E; border-radius:14px; padding:22px 26px; font-size:22px; line-height:1.6; }
+  .p-notes p{ margin-bottom:14px; }
+  .p-notes .dir{ color:#F59E0B; font-size:18px; }
+  .p-notes .meta{ color:#64748B; font-size:14px; border-top:1px solid #1F2B45; padding-top:10px; margin-top:10px; }
+  .p-tag{ display:inline-block; background:#F59E0B; color:#0B1220; font-size:13px; font-weight:700; padding:2px 10px; border-radius:999px; margin-bottom:12px; }
+  .p-side{ display:flex; flex-direction:column; gap:8px; min-height:0; }
+  .p-frame{ position:relative; width:100%; aspect-ratio:16 / 9; border-radius:12px; overflow:hidden; background:#000; }
+  .p-frame iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; pointer-events:none; }
+  .p-label{ font-size:14px; color:#94A3B8; margin-top:4px; }
+  .p-top .steps{ font-size:15px; color:#94A3B8; }
+  .p-top .steps.more{ color:#F59E0B; font-weight:700; }
+  .p-keys{ margin-top:auto; font-size:13px; color:#64748B; line-height:1.5; }
+  .p-next-title{ color:#CBD5E1; }
+
+  /* printing: every slide on its own page, everything shown */
+  @page{ size:1600px 900px; margin:0; }
+  @media print{
+    html, body{ overflow:visible; height:auto; background:#fff; }
+    #stage{ position:static; display:block; }
+    #deck{ transform:none !important; height:auto; overflow:visible; }
+    .slide{ position:relative; opacity:1 !important; transform:none !important; height:900px; break-after:page; }
+    .reveal, [data-step]{ opacity:1 !important; transform:none !important; }
+    .bug{ opacity:1 !important; }
+    .hero-line span{ transform:none !important; }
+    #dots, #progress-track, #ui, #blank{ display:none; }
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck">
+<div id="progress-track"><div id="progress-bar"></div></div>
+
+<section class="slide dark active" data-n="1" aria-label="פתיחה: הייתם ממזגים?">
+  
+  <div class="blob" style="width:560px;height:560px;bottom:-240px;left:-240px;background:var(--navy2)"></div>
+  <p class="case-line reveal" data-d="1">הסוכן הריץ את כל הבדיקות של שינוי בקוד, וחזר עם התוצאה הזו:</p>
+  <div class="terminal big reveal" data-d="2" dir="ltr"><span class="dots"><i></i><i></i><i></i></span><code class="typeout" data-text="Passed!  Failed: 0, Passed: 1142">Passed!  Failed: 0, Passed: 1142</code></div>
+  <h2 class="cold-q reveal" data-d="30">הייתם ממזגים?</h2>
+  <div class="pagenum">01</div>
+</section>
+<section class="slide dark" data-n="2" aria-label="פתיחה">
+  
+  
+  <div class="blob" style="width:420px;height:420px;top:-140px;left:-60px;background:var(--navy2)"></div>
+  <div class="blob" style="width:280px;height:280px;top:-90px;left:20px;background:var(--teal);opacity:.85"></div>
+  <div class="blob" style="width:520px;height:520px;bottom:-220px;right:-140px;background:var(--navy2);opacity:.6"></div>
+  <div class="hero-line"><span class="title-hero">לעבוד נכון עם AI בפיתוח</span></div>
+  <p class="lead hero-sub reveal" data-d="2">מהבסיס, דרך שיטות העבודה המומלצות, ועד הדרך שבה אנחנו עובדים</p>
+  <div class="tagline reveal" data-d="3"><i></i><span>הרצאה למפתחי SQLink Digital</span></div>
+  <div class="pagenum">02</div>
+</section>
+<section class="slide" data-n="3" aria-label="מה בהרצאה הזו, ומה בהרצאות אחרות">
+  
+  <h2 class="title-lg reveal" data-d="1">מה בהרצאה הזו, ומה בהרצאות אחרות</h2>
+  <p class="lead reveal" data-d="2">בחצי שעה אי אפשר לכסות את כל הנושא, ולכן ההרצאה מתמקדת ברעיון אחד.</p>
+  <div class="twocol essence">
+    <div class="card tint big reveal" data-d="3"><div class="card-label">הרעיון המרכזי</div><p>הטעויות היקרות שראינו לא היו המצאות. העובדות היו נכונות, והמסקנה הייתה שגויה.</p><p>לכן ההרצאה עוסקת בדבר אחד: איך עובדים עם עוזר קוד כך שהטעויות האלה נתפסות בזמן.</p></div>
+    <div class="card quiet reveal" data-d="4"><div class="card-label">נושאים להרצאות אחרות</div><ul><li>איך מודל שפה מאומן ומה קורה בתוכו</li><li>השוואה בין כלים ובחירת מודל</li><li>כתיבת skills, hooks וסוכנים משלכם, וחיבור מערכות חיצוניות</li><li>אבטחה, פרטיות ומדיניות שימוש בנתונים</li><li>איך צוות סוקר קוד שכתב AI</li></ul></div>
+  </div>
+  <div class="callout reveal" data-d="5"><span>בסוף ההרצאה תקבלו חמישה הרגלים שאפשר ליישם כבר מחר.</span></div>
+  <div class="pagenum">03</div>
+</section>
+<section class="slide" data-n="4" aria-label="המפה והמטרות">
+  
+  <h2 class="title-lg reveal" data-d="1">שלושה חלקים, ומה תדעו בסוף כל אחד</h2>
+  <p class="lead reveal" data-d="2">כל חלק נשען על הקודם.</p>
+  <div class="rows">
+    <div class="row reveal" data-d="3"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><h3>היסודות</h3><p>תבינו איך עוזר קוד מבוסס AI עובד, ולמה הוא טועה דווקא כשהכל נראה תקין</p></div><div class="row reveal" data-d="4"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><h3>שיטות העבודה</h3><p>תכירו שש שיטות שתופסות את הטעויות האלה בזמן, ותבינו למה הן עובדות</p></div><div class="row reveal" data-d="5"><span class="badge " style="background:var(--purple);color:#fff">3</span><h3>איך אנחנו עובדים</h3><p>תראו איך צוות אחד בנה את זה, ומה אפשר לקחת לפרויקט שלכם</p></div>
+  </div>
+  <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>ככה מסומן מושג חדש</b><span class="m">הגדרה קצרה, במקום שבו המילה מופיעה לראשונה</span></div>
+  <div class="pagenum">04</div>
+</section>
+<section class="slide dark" data-n="5" aria-label="חלק 1: היסודות">
+  
+  <div class="blob" style="width:560px;height:560px;bottom:-240px;left:-240px;background:var(--navy2)"></div>
+    <div class="divider">
+      <div class="dv-text">
+        <p class="eyebrow reveal" data-d="1" style="color:var(--teal)">חלק 1</p>
+        <h2 class="dv-title reveal" data-d="2">היסודות</h2>
+        <p class="lead reveal" data-d="3">איך עוזר קוד מבוסס AI עובד, ולמה הוא טועה</p>
+        <p class="dv-label reveal" data-d="4">בחלק הזה:</p>
+        <ul class="dv-list reveal" data-d="5"><li>מה המודל יודע, ומה לא</li><li>חלון ההקשר: מה המודל רואה</li><li>סוכן: מה הוא עושה, ומתי הוא עוצר</li><li>מקרה אמיתי מאצלנו</li></ul>
+      </div>
+      <div class="dv-num reveal" data-d="2" style="color:var(--teal)">01</div>
+    </div>
+    <div class="route reveal" data-d="6"><span class="on" style="background:var(--teal);color:var(--navy)"><small>חלק 1</small><b>היסודות</b></span><span class="" style=""><small>חלק 2</small><b>שיטות העבודה</b></span><span class="" style=""><small>חלק 3</small><b>איך אנחנו עובדים</b></span></div>
+  <div class="pagenum">05</div>
+</section>
+<section class="slide" data-n="6" aria-label="מודל שפה">
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <h2 class="title-lg reveal" data-d="1">מודל שפה משלים טקסט, ואת הקוד שלנו הוא לא מכיר</h2>
+  <p class="lead reveal" data-d="2">עוזרי קוד כמו Claude, ChatGPT או Copilot בנויים כולם על מודל שפה.</p>
+  <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>מודל שפה (LLM)</b><span class="m">תוכנה שלמדה מכמות עצומה של טקסט וקוד, ומנבאת בכל צעד את ההמשך הסביר</span></div>
+  <div class="twocol"><div class="card  reveal" data-d="3"><div class="card-label">מה יש לו</div><ul><li>ידע כללי רחב: שפות, ספריות ודפוסים</li><li>מבין משימה, מתכנן וכותב קוד שעובד</li><li>מהיר בכתיבה, אבל הבדיקה עדיין לוקחת זמן</li></ul></div><div class="card warn reveal" data-d="4"><div class="card-label">מה אין לו</div><ul><li>את הקוד שלנו, אלא אם קרא אותו עכשיו</li><li>זיכרון בין שיחות, חוץ ממה שנכתב לקבצים</li><li>ידע על גרסאות שיצאו אחרי האימון</li><li>ביטחון שמעיד על הדיוק</li></ul></div></div>
+  <div class="callout reveal" data-d="5"><span>כל מה שהמודל צריך לדעת על המשימה חייב להיכנס להקשר שלו.</span></div>
+  <div class="pagenum">06</div>
+</section>
+<section class="slide" data-n="7" aria-label="חלון ההקשר">
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <h2 class="title-lg reveal" data-d="1">חלון ההקשר: כל מה שהמודל רואה, במקום מוגבל</h2>
+  <p class="lead reveal" data-d="2">ההוראות, השיחה, כל קובץ שהוא קרא וכל פלט של פקודה נמצאים באותו חלון.</p>
+  <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>טוקן (token)</b><span class="m">יחידת הטקסט שהמודל קורא וכותב, לרוב חלק ממילה. גודל החלון נמדד בטוקנים</span></div>
+  <div class="bar reveal" data-d="3"><span data-step="1" style="flex:1.2;background:var(--navy);color:#fff">הוראות</span><span data-step="2" style="flex:2;background:var(--teal);color:var(--navy)">השיחה</span><span data-step="3" style="flex:2;background:var(--gold);color:var(--navy)">קבצים שנקראו</span><span data-step="4" style="flex:4.2;background:var(--red-dark);color:#fff">פלט של פקודות</span><span style="flex:2.733;background:var(--card);color:var(--muted)">פנוי</span></div>
+  <p class="caption" data-step="4">איור. סשן דיבוג אחד יכול לצרוך עשרות אלפי טוקנים.</p>
+  <div data-step="5">
+  <div class="twocol"><div class="card warn head reveal" data-d="4"><div class="card-label">ככל שהחלון מתמלא, האיכות יורדת</div><p>לתופעה הזאת קוראים context rot</p></div><div class="card head reveal" data-d="5"><div class="card-label">השיחה לא נשמרת בין סשנים</div><p>בשביל זה יש קבצי הנחיות שנטענים בכל סשן:</p><p><code>CLAUDE.md, AGENTS.md</code></p></div></div>
+  <div class="callout reveal" data-d="6"><span>חלון ההקשר מוגבל, ולכן צריך לנהל אותו.</span></div>
+  </div>
+  <div class="pagenum">07</div>
+</section>
+<section class="slide" data-n="8" aria-label="סוכן">
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <h2 class="title-lg reveal" data-d="1">סוכן: מודל עם כלים, שעובד בלולאה</h2>
+  <p class="lead reveal" data-d="2">בניגוד לצ'אט, סוכן עובד בעצמו: קורא קבצים, מריץ פקודות, עורך קוד ובודק את התוצאה.</p>
+  <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>harness</b><span class="m">התוכנה שעוטפת את המודל, נותנת לו כלים ומנהלת את ההקשר וההרשאות. למשל Claude Code</span></div>
+  <div class="loop reveal" data-d="3" data-fx="loop" data-stop="1">
+    <div class="loop-row"><div class="lbox" style="background:var(--teal);color:var(--navy)"><span class="num">01</span><span class="t">מבין את המשימה</span></div><div class="chev-wrap"><i class="chev"></i></div><div class="lbox" style="background:var(--gold);color:var(--navy)"><span class="num">02</span><span class="t">קורא קבצים</span></div><div class="chev-wrap"><i class="chev"></i></div><div class="lbox" style="background:var(--purple);color:#fff"><span class="num">03</span><span class="t">משנה קוד ומריץ</span></div><div class="chev-wrap"><i class="chev"></i></div><div class="lbox" style="background:var(--pink);color:#fff"><span class="num">04</span><span class="t">בודק את התוצאה</span></div></div>
+    <svg class="loop-back track-svg" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true">
+  <path class="track" d="M125 4 V28 H875 V10"/><path class="head" d="M866 16 L875 6 L884 16"/><circle class="runner" r="8" cx="-30" cy="-30"/></svg>
+    <p class="caption center">הסבב הזה חוזר שוב ושוב, עד שהעבודה נראית לו גמורה.</p>
+  </div>
+  <div class="alert reveal" data-d="4" data-emph="1"><b>הוא עוצר כשהעבודה <u>נראית</u> גמורה.</b><span>בלי בדיקה שהוא יכול להריץ, אתם אלה שבודקים.</span></div>
+  <div class="callout reveal" data-d="5"><span class="ours">אצלנו</span><span>הסוכן עובד מקצה לקצה: מהכרטיס, דרך פתיחת PR ועד העדכון בלוח המשימות.</span></div>
+  <div class="pagenum">08</div>
+</section>
+<section class="slide dark" data-n="9" aria-label="המקרה: אתם הייתם ממזגים?">
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="blob" style="width:560px;height:560px;bottom:-240px;left:-240px;background:var(--navy2)"></div><h2 class="title-lg reveal" data-d="1">מקרה אמיתי: אתם הייתם ממזגים?</h2>
+  <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>worktree</b><span class="m">עותק עבודה נוסף של אותו מאגר בתיקייה נפרדת. אצלנו יש מהם הרבה, עם אותם נתיבים</span></div>
+  <p class="case-line reveal" data-d="3">בשינוי מסוים נוספו בדיקות חדשות. הסוכן הריץ את כל הבדיקות, וחזר עם התוצאה הזו:</p>
+  <div class="terminal big reveal" data-d="4" dir="ltr"><span class="dots"><i></i><i></i><i></i></span><code class="typeout" data-text="Passed!  Failed: 0, Passed: 1142">Passed!  Failed: 0, Passed: 1142</code></div>
+  <div class="pagenum">09</div>
+</section>
+<section class="slide" data-n="10" aria-label="התשובה: העותק הלא נכון">
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <h2 class="title-lg reveal" data-d="1">הבדיקות באמת רצו, אבל על העותק הלא נכון</h2>
+  <div class="twocol tight">
+    <div class="card reveal" data-d="2"><div class="card-label">מה הפלט אמר</div><p class="big-num">1142 עברו, 0 נכשלו</p></div>
+    <div class="card warn reveal" data-d="3"><div class="card-label">מה היה נכון</div><p class="big-num red">יש <span data-count="1194" data-from="1142">1194</span> בדיקות.</p><p class="big-num red">52 החסרות הן בדיוק החדשות.</p></div>
+  </div>
+  <div class="gap reveal" data-d="4"><div class="gap-bar"><span class="ran" style="flex:1142"></span><span class="miss" style="flex:52"></span></div>
+    <div class="gap-labels"><span>1142 רצו</span><span class="m">52 לא רצו</span></div></div>
+  <div class="mech reveal" data-d="5" data-fx="mech" data-play="1">
+  <span class="mech-tag">המחשה</span>
+  <svg class="m-lines" viewBox="0 0 1376 230" aria-hidden="true">
+    <path class="l-term" d="M1046 50 C960 50 950 104 860 104"/>
+    <path class="l-term" d="M1046 180 C960 180 950 126 860 126"/>
+    <path class="l-task" d="M560 104 C470 104 470 50 380 50"/>
+    <path class="l-other" d="M560 126 C470 126 470 180 380 180"/>
+  </svg>
+  <div class="m-term t-bash" dir="ltr"><div class="tbar"><i></i><i></i><i></i><b>Bash</b></div>
+    <code class="line"><span class="p">$ </span><span class="cmd" data-text="cd ../other">cd ../other</span></code></div>
+  <div class="m-term t-ps" dir="ltr"><div class="tbar"><i></i><i></i><i></i><b>PowerShell</b></div>
+    <code class="line"><span class="p">PS&gt; </span><span class="cmd" data-text="dotnet test">dotnet test</span></code><code class="out">Passed: 1142</code></div>
+  <div class="m-shared"><b>תיקיית עבודה אחת</b><span class="where"><span class="w1">העותק של המשימה</span><span class="w2">עותק אחר</span></span></div>
+  <div class="m-copy c-task"><b>העותק של המשימה</b><span>1194 בדיקות, כולל 52 החדשות</span><em class="tag">52 החדשות לא רצו</em></div>
+  <div class="m-copy c-other"><b>עותק אחר</b><span>1142 בדיקות</span><em class="tag">כאן רצו 1142 ועברו</em></div>
+</div>
+  <div class="explain reveal" data-d="6"><p>שני כלי הטרמינל של הסוכן חולקים תיקיית עבודה אחת. cd באחד מהם העביר גם את השני, והבדיקות רצו בעותק אחר.</p><p>גילינו את זה כי ידענו כמה לצפות: הרצה שהייתה אמורה למצוא 6 בדיקות מצאה רק אחת.</p></div>
+  <div class="callout reveal" data-d="7"><span>ההנחה שאף אחד לא בדק: שהבדיקות רצות על הקוד של המשימה.</span></div>
+  <div class="pagenum">10</div>
+</section>
+<section class="slide" data-n="11" aria-label="שלושה סוגים של טעות">
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <h2 class="title-lg reveal" data-d="1">איפה הטעות: בעובדה, בשאלה, או במסקנה</h2>
+  <div class="types big"><div class="type reveal" data-d="2"><i style="background:var(--teal)"></i><h4>עובדה שגויה</h4><p>הזיה, ולרוב קל לתפוס אותה</p></div><div class="type reveal" data-d="3"><i style="background:var(--gold)"></i><h4>עובדה נכונה, לשאלה אחרת</h4><p>כמו כאן, וקשה לתפוס</p></div><div class="type hot reveal" data-d="4"><i style="background:var(--red)"></i><h4>עובדה נכונה, ומסקנה רחבה מדי</h4><p>היקרה ביותר, כי הכל נראה בסדר</p></div></div>
+  <div class="callout reveal" data-d="5"><span>הטעויות היקרות שראינו היו במסקנות מעובדות נכונות.</span></div>
+  <div class="pagenum">11</div>
+</section>
+<section class="slide dark" data-n="12" aria-label="חלק 2: שיטות העבודה">
+  
+  <div class="blob" style="width:560px;height:560px;bottom:-240px;left:-240px;background:var(--navy2)"></div>
+    <div class="divider">
+      <div class="dv-text">
+        <p class="eyebrow reveal" data-d="1" style="color:var(--gold)">חלק 2</p>
+        <h2 class="dv-title reveal" data-d="2">שיטות העבודה</h2>
+        <p class="lead reveal" data-d="3">שש שיטות שעובדות, ולמה</p>
+        <p class="dv-label reveal" data-d="4">בחלק הזה:</p>
+        <ul class="dv-list reveal" data-d="5"><li>לכל שיטה: למה היא עובדת, ואיך היא נראית אצלנו</li><li>חמש טעויות נפוצות</li></ul>
+      </div>
+      <div class="dv-num reveal" data-d="2" style="color:var(--gold)">02</div>
+    </div>
+    <div class="route reveal" data-d="6"><span class="" style=""><small>חלק 1</small><b>היסודות</b></span><span class="on" style="background:var(--gold);color:var(--navy)"><small>חלק 2</small><b>שיטות העבודה</b></span><span class="" style=""><small>חלק 3</small><b>איך אנחנו עובדים</b></span></div>
+  <div class="pagenum">12</div>
+</section>
+<section class="slide" data-n="13" aria-label="שיטה 1: בדיקה">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <p class="kicker reveal" data-d="1">שיטה 1 מתוך 6</p><h2 class="title-lg reveal" data-d="1">לתת לסוכן דרך לבדוק את עצמו</h2><p class="lead reveal" data-d="2">בדיקה שהסוכן מריץ בעצמו היא ההבדל בין סשן שצריך להשגיח עליו לבין סשן שאפשר לעזוב.</p>
+    <div class="twocol"><div class="card  reveal" data-d="3"><div class="card-label">למה</div><p>הסוכן עוצר כשהעבודה <b>נראית</b> גמורה.</p><p>בלי בדיקה, אתם צריכים לבדוק במקומו.</p><p>עם בדיקה, הוא מתקן לבד, בלי לגעת בבדיקה.</p></div><div class="card tint reveal" data-d="4"><div class="card-label">איך עושים</div><ul><li>בדיקה שמחזירה עבר או נכשל: טסטים, build או צילום מסך</li><li>לבקש לראות את הפלט של הבדיקה</li><li>"תריץ את הטסטים ותראה לי את הפלט"</li></ul></div></div>
+    <div class="callout reveal" data-d="5"><span class="ours">אצלנו</span><span>אומרים "סיימתי" רק אחרי בדיקה שיכלה להיכשל, ולא נכשלה.</span></div>
+  <div class="pagenum">13</div>
+</section>
+<section class="slide" data-n="14" aria-label="שיטה 2: תכנון">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <p class="kicker reveal" data-d="1">שיטה 2 מתוך 6</p><h2 class="title-lg reveal" data-d="1">קודם לחקור ולתכנן, ורק אחר כך לכתוב קוד</h2><p class="lead reveal" data-d="2">סוכן שקופץ ישר לקוד עלול לפתור היטב את הבעיה הלא נכונה.</p><div class="term reveal" data-d="2"><span class="tag">מושג</span><b>plan mode</b><span class="m">מצב שבו הסוכן רק קורא ומתכנן, בלי לשנות אף קובץ</span></div>
+    <div class="twocol"><div class="card  reveal" data-d="3"><div class="card-label">ארבעה שלבים</div><ul><li><b>לחקור</b> בלי לשנות כלום</li><li><b>לתכנן</b> ולקרוא את התוכנית</li><li><b>לממש</b> עם בדיקות</li><li><b>לסגור</b> עם commit ופתיחת PR</li></ul></div><div class="card tint reveal" data-d="4"><div class="card-label">מתי לדלג</div><p>שינוי שאפשר לתאר במשפט אחד, פשוט עושים.</p><p>תכנון שווה את הזמן כשלא ברור איך, כשנוגעים בכמה קבצים, או כשלא מכירים את הקוד.</p></div></div>
+    <div class="callout reveal" data-d="5"><span class="ours">אצלנו</span><span>לפני שנוצר ענף, <code>/start-task</code> שואל אם בכלל להתחיל.</span></div>
+  <div class="pagenum">14</div>
+</section>
+<section class="slide" data-n="15" aria-label="שיטה 3: ספציפיות">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <p class="kicker reveal" data-d="1">שיטה 3 מתוך 6</p><h2 class="title-lg reveal" data-d="1">להיות ספציפיים: מה הבעיה, איפה, ואיך נראה תיקון</h2>
+  <p class="lead reveal" data-d="2">ככל שהבקשה מפורטת יותר, צריך פחות סבבים של תיקונים.</p>
+  <div class="compare">
+    <div class="cmp-head reveal" data-d="3"><span class="bad">במקום</span><span></span><span class="good">עדיף</span></div>
+    <div class="cmp-row reveal" data-d="4"><div class="cmp bad">"תתקן את הבאג בהתחברות"</div><div class="chev-wrap"><i class="chev"></i></div><div class="cmp good">"ההתחברות נכשלת אחרי שפג תוקף הסשן. תשחזר בטסט, ואז תתקן."</div></div><div class="cmp-row reveal" data-d="5"><div class="cmp bad">"תוסיף טסטים לקובץ הזה"</div><div class="chev-wrap"><i class="chev"></i></div><div class="cmp good">"תכתוב טסט למקרה שבו המשתמש לא מחובר, בלי mocks"</div></div><div class="cmp-row reveal" data-d="6"><div class="cmp bad">"תוסיף ווידג'ט של לוח שנה"</div><div class="chev-wrap"><i class="chev"></i></div><div class="cmp good">"תבנה אותו לפי הדפוס של הווידג'טים הקיימים."</div></div>
+  </div>
+  <div class="callout reveal" data-d="7"><span class="ours">אצלנו</span><span>בודקים טענות מול המסמך המקורי, כמו מסמך הדרישות או הכרטיס, ולא מול סיכום שלו.</span></div>
+  <div class="pagenum">15</div>
+</section>
+<section class="slide" data-n="16" aria-label="שיטה 4: ניהול ההקשר">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <p class="kicker reveal" data-d="1">שיטה 4 מתוך 6</p><h2 class="title-lg reveal" data-d="1">לנהל את ההקשר: סשן נקי לכל משימה</h2>
+  <p class="lead reveal" data-d="2">ככל שהחלון מתמלא, האיכות יורדת. ארבע פעולות עוזרות לשמור עליו נקי:</p>
+  <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>סוכן משנה (subagent)</b><span class="m">סוכן נפרד עם חלון הקשר משלו: מקבל משימה, ומחזיר רק את המסקנה</span></div>
+  <div class="grid4"><div class="ncard reveal" data-d="3"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><div><h4>לכל משימה סשן נקי</h4><p>לא לערבב משימות. ביניהן צ'אט חדש.</p></div></div><div class="ncard reveal" data-d="4"><span class="badge " style="background:var(--teal);color:var(--navy)">2</span><div><h4>שני תיקונים לא עזרו?</h4><p>פותחים סשן נקי, עם בקשה טובה יותר.</p></div></div><div class="ncard reveal" data-d="5"><span class="badge " style="background:var(--teal);color:var(--navy)">3</span><div><h4>חקירה כבדה עוברת לסוכן משנה</h4><p>הוא קורא בהקשר נפרד, ומחזיר רק סיכום.</p></div></div><div class="ncard reveal" data-d="6"><span class="badge " style="background:var(--teal);color:var(--navy)">4</span><div><h4>קובץ הנחיות קצר</h4><p>שורה שלא מונעת טעות נמחקת. עד 200 שורות.</p><p class="stat">קובץ צד השרת: <b data-count="316" data-from="505">316</b> שורות במקום 505</p></div></div></div>
+  <div class="callout reveal" data-d="7"><span class="ours">אצלנו</span><span>כללים נטענים תמיד, נהלים רק כשצריך, וקריאה כבדה עוברת לסוכני משנה.</span></div>
+  <div class="pagenum">16</div>
+</section>
+<section class="slide" data-n="17" aria-label="שיטה 5: כללים קשיחים">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <p class="kicker reveal" data-d="1">שיטה 5 מתוך 6</p><h2 class="title-lg reveal" data-d="1">מה שחייב לקרות תמיד, לא משאירים כבקשה</h2><p class="lead reveal" data-d="2">הנחיה היא המלצה, והסוכן יכול לפספס אותה.</p><div class="term reveal" data-d="2"><span class="tag">מושג</span><b>hook</b><span class="m">סקריפט שרץ אוטומטית ברגע קבוע, ולכן הוא רץ תמיד</span></div>
+    <div class="twocol"><div class="card  reveal" data-d="3"><div class="card-label">שלושה מנגנונים</div><ul><li><b>hooks</b> רצים אוטומטית, בכל פעם</li><li><b>הרשאות</b> קובעות מה מותר בלי לשאול</li><li><b>סקירה בהקשר נקי</b>: סוכן נפרד בודק את השינוי</li></ul></div><div class="card tint reveal" data-d="4"><div class="card-label">דוגמאות</div><ul><li>hook שמריץ lint אחרי כל עריכה</li><li>hook שחוסם שינויים בתיקיית migrations</li><li>סוכן שבודק את השינוי מול התוכנית</li></ul></div></div>
+    <div class="callout reveal" data-d="5"><span class="ours">אצלנו</span><span>hook מסנכרן את ההנחיות בכל סשן, וסוכן בשם <code>claim-checker</code> בודק טענות.</span></div>
+  <div class="pagenum">17</div>
+</section>
+<section class="slide" data-n="18" aria-label="שיטה 6: כל טעות לכלל">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <p class="kicker reveal" data-d="1">שיטה 6 מתוך 6</p><h2 class="title-lg reveal" data-d="1">טעות שחזרה פעמיים הופכת לכלל, כדי שלא תחזור</h2><p class="lead reveal" data-d="2">במקום לתקן את אותה טעות שוב ושוב, מתקנים את הסביבה של הסוכן.</p><div class="term reveal" data-d="2"><span class="tag">מושג</span><b>harness engineering</b><span class="m">בניית ההנחיות, הכלים והבדיקות סביב הסוכן, כך שטעות לא חוזרת</span></div>
+    <div class="twocol"><div class="card  reveal" data-d="3"><div class="card-label">מאיפה זה בא</div><p class="src"><b>Mitchell Hashimoto</b> כתב בפברואר 2026</p><p>על כל טעות בונים כלל או בדיקה, כדי שלא תחזור.</p>
+        <p class="src"><b>OpenAI</b> פרסמו בפברואר 2026</p><p>המהנדסים לא כתבו קוד. הם בנו את הסביבה.</p></div><div class="card tint reveal" data-d="4"><div class="card-label">איך עושים</div><ul><li>טעות שחזרה פעמיים הופכת לכלל קצר</li><li>כלל שהסוכן מפספס נהיה hook או בדיקה</li><li>כלל שלא עוזר נמחק</li></ul></div></div>
+    <div class="callout reveal" data-d="5"><span class="ours">אצלנו</span><span>לקח שכדאי לכולם עובר לפלייבוק, ומשם לסוכן של כל מפתח בצוות.</span></div>
+  <div class="pagenum">18</div>
+</section>
+<section class="slide" data-n="19" aria-label="חמש טעויות נפוצות">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <h2 class="title-lg reveal" data-d="1">חמש טעויות נפוצות. כמה מהן עשיתם השבוע?</h2>
+  <div class="mistakes">
+    <div class="m-head reveal" data-d="2"><span></span><span></span><span>מה קורה</span><span class="fix">התיקון</span></div>
+    <div class="m-row" data-step="1"><span class="badge " style="background:var(--gold);color:var(--navy)">1</span><b>הסשן שמכיל הכל</b><span>משימה, שאלה צדדית, ושוב המשימה</span><span class="fix">צ'אט חדש לכל משימה</span></div><div class="m-row" data-step="1"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><b>תיקון אחרי תיקון</b><span>ההקשר מתמלא בניסיונות כושלים</span><span class="fix">סשן נקי, בקשה טובה יותר</span></div><div class="m-row" data-step="1"><span class="badge " style="background:var(--gold);color:var(--navy)">3</span><b>קובץ הנחיות ארוך מדי</b><span>הכללים החשובים הולכים לאיבוד</span><span class="fix">לקצץ, או לבנות hook</span></div><div class="m-row" data-step="2"><span class="badge " style="background:var(--gold);color:var(--navy)">4</span><b>סומכים בלי לבדוק</b><span>מימוש סביר בלי מקרי קצה</span><span class="fix">אם אין בדיקה, לא משחררים</span></div><div class="m-row" data-step="3"><span class="badge " style="background:var(--gold);color:var(--navy)">5</span><b>החקירה שלא נגמרת</b><span>בקשה בלי גבולות, ומאות קבצים נקראים</span><span class="fix">לתחום, או סוכן משנה</span></div>
+  </div>
+  <div class="pagenum">19</div>
+</section>
+<section class="slide dark" data-n="20" aria-label="חלק 3: איך אנחנו עובדים">
+  
+  <div class="blob" style="width:560px;height:560px;bottom:-240px;left:-240px;background:var(--navy2)"></div>
+    <div class="divider">
+      <div class="dv-text">
+        <p class="eyebrow reveal" data-d="1" style="color:var(--purple-light)">חלק 3</p>
+        <h2 class="dv-title reveal" data-d="2">איך אנחנו עובדים</h2>
+        <p class="lead reveal" data-d="3">דוגמה: איך צוות אחד עובד עם זה ביום יום</p>
+        <p class="dv-label reveal" data-d="4">בחלק הזה:</p>
+        <ul class="dv-list reveal" data-d="5"><li>הפלייבוק: מקור אחד, ומפתח חדש מצטרף בשתי פקודות</li><li>סרטון: משימה אחת מהכרטיס ועד המיזוג</li><li>יום עבודה: הכלל בכל שלב, ולמה הוא קיים</li><li>מה נשאר באחריות שלכם</li></ul>
+      </div>
+      <div class="dv-num reveal" data-d="2" style="color:var(--purple)">03</div>
+    </div>
+    <div class="route reveal" data-d="6"><span class="" style=""><small>חלק 1</small><b>היסודות</b></span><span class="" style=""><small>חלק 2</small><b>שיטות העבודה</b></span><span class="on" style="background:var(--purple);color:#fff"><small>חלק 3</small><b>איך אנחנו עובדים</b></span></div>
+  <div class="pagenum">20</div>
+</section>
+<section class="slide" data-n="21" aria-label="הפלייבוק">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span></div>
+  <h2 class="title-lg reveal" data-d="1">הפלייבוק: כותבים במקור אחד, וזה מגיע לכל מפתח בצוות</h2>
+  <p class="lead reveal" data-d="2">עד סוף אוגוסט היו שש גרסאות שונות של ההנחיות. היום יש מקור אחד.</p>
+  <div class="pb" data-fx="flow">
+    <div class="pb-col card reveal" data-d="3">
+      <p class="pb-label">המקור: מאגר קוד משותף</p><p class="pb-name"><code>engineering-playbook</code></p>
+      <div class="pb-row"><span>משותף לכל המאגרים</span><code>_common/</code></div><div class="pb-row"><span>הנחיות לכל מאגר</span><code>bd-ms/  bd-client/</code></div><div class="pb-row"><span>סקריפטים, כולל hooks</span><code>tooling/</code></div>
+    </div>
+    <div class="flow-gap g1"><svg class="gtrack" viewBox="0 0 66 16" aria-hidden="true">
+  <path class="dash" d="M62 8 H9"/><path class="head" d="M17 1.5 L8 8 L17 14.5"/></svg><i class="packet"></i></div>
+    <div class="pb-col card tool reveal" data-d="4">
+      <p class="pb-name"><code>playbook_sync.py</code></p>
+      <p>מרכיב קבצים לכל מאגר</p><p>מוודא שכל עותק זהה למקור</p><p>מפיץ לכל העותקים</p>
+    </div>
+    <div class="flow-gap g2"><svg class="gtrack" viewBox="0 0 66 16" aria-hidden="true">
+  <path class="dash" d="M62 8 H9"/><path class="head" d="M17 1.5 L8 8 L17 14.5"/></svg><i class="packet"></i></div>
+    <div class="pb-col card reveal" data-d="5">
+      <p class="pb-title"><span data-count="165">165</span> עותקים במחשב שלי</p>
+      <div class="pb-row thin"><span>Claude Code קורא</span><code>CLAUDE.md</code></div><div class="pb-row thin"><span>Codex קורא</span><code>AGENTS.md</code></div><div class="pb-row thin"><span>כללים לפי נתיב</span><code>.claude/rules/</code></div><div class="pb-row thin"><span>נהלים לפי דרישה</span><code>.claude/skills/</code></div><div class="pb-row thin"><span>סוכני משנה</span><code>.claude/agents/</code></div>
+    </div>
+  </div>
+  <svg class="pb-back track-svg" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true">
+  <path class="track" d="M170 4 V28 H830 V10"/><path class="head" d="M821 16 L830 6 L839 16"/><circle class="runner" r="8" cx="-30" cy="-30"/></svg>
+  <div class="flows reveal" data-d="6">
+    <p><svg class="arr" viewBox="0 0 40 14" aria-hidden="true"><path d="M38 7H4M10 1L3 7l7 6" fill="none" stroke="#94A3B8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>בפתיחת סשן, hook מושך את הגרסה האחרונה ומעדכן את הקבצים בעותק.</span></p>
+    <p><svg class="arr" viewBox="0 0 40 14" aria-hidden="true"><path d="M2 7h34M30 1l7 6-7 6" fill="none" stroke="var(--gold)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>מפתח שלמד משהו מריץ את <code>contribute</code> והעריכה חוזרת למקור, ומשם לכל העותקים של הקובץ.</span></p>
+  </div>
+  <div class="callout reveal" data-d="7"><span class="ours you">אצלכם</span><span>קובץ הנחיות אחד בתוך המאגר, שעובר code review כמו קוד.</span></div>
+  <div class="pagenum">21</div>
+</section>
+<section class="slide" data-n="22" aria-label="מפתח חדש אצלנו">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span></div>
+  <h2 class="title-lg reveal" data-d="1">מפתח חדש אצלנו: שתי פקודות להתקנה, ואחת לבדיקה</h2>
+  <div class="start">
+    <div class="srow reveal" data-d="2"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><div><h3>משכפלים את מאגר הפלייבוק</h3><p>פעם אחת, לתיקייה קבועה:</p>
+      <div class="chips"><code class="chip wide">git clone https://bitbucket.org/sqlink/engineering-playbook.git C:/Dev/engineering-playbook</code></div></div></div>
+    <div class="srow reveal" data-d="3"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><div><h3>מריצים פקודה אחת שמכינה את המחשב</h3><p>היא מתקינה hooks שמעדכנים את ההנחיות בכל סשן:</p>
+      <div class="chips"><code class="chip wide">python C:/Dev/engineering-playbook/AI/tooling/playbook_sync.py bootstrap</code></div></div></div>
+    <div class="srow reveal" data-d="4"><span class="badge " style="background:var(--purple);color:#fff">3</span><div><h3>ומאותו רגע, כל סשן מתעדכן לבד</h3><p>ההנחיות, הכללים והנהלים מגיעים לכל מאגר, ופקודה אחת בודקת שהכול מחובר:</p>
+      <div class="chips"><code class="chip wide">python C:/Dev/engineering-playbook/AI/tooling/playbook_sync.py doctor</code></div></div></div>
+  </div>
+  <div class="callout reveal" data-d="5"><span class="ours you">אצלכם</span><span>כשקובץ ההנחיות בתוך המאגר, מספיק לשכפל אותו.</span></div>
+  <div class="pagenum">22</div>
+</section>
+<section class="slide dark film" data-n="23" aria-label="מהכרטיס ועד המיזוג">
+  
+  <h2 class="sr-only">מהכרטיס ועד המיזוג</h2>
+  <div class="film-wrap" data-fx="film" data-play="1"><iframe src="film.html#deck" title="מהכרטיס ועד המיזוג" tabindex="-1"></iframe></div>
+  <div class="pagenum">23</div>
+</section>
+<section class="slide" data-n="24" aria-label="יום עבודה אצלנו">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span></div>
+  <h2 class="title-lg reveal" data-d="1">יום עבודה: מה קורה בכל שלב, ולמה הכלל קיים</h2>
+  <div class="flow">
+    <div class="station" data-step="1">
+      <div class="sbox" style="background:var(--teal);color:var(--navy)"><span class="num">01</span>
+        <div><span class="t">לקחת משימה</span><code>start-task</code></div></div>
+      <p class="rule"><small>הכלל</small>מחליטים אם להתחיל<br>עוד לפני שנוצר ענף</p>
+      <p class="why"><small>למה</small>כל כרטיס התחיל,<br>גם של צוות אחר</p>
+    </div><div class="chev-wrap" data-step="2"><i class="chev"></i></div>
+    <div class="station" data-step="2">
+      <div class="sbox" style="background:var(--gold);color:var(--navy)"><span class="num">02</span>
+        <div><span class="t">לכתוב קוד</span><span class="uses">כללי הפלייבוק</span></div></div>
+      <p class="rule"><small>הכלל</small>מוסיפים קבצים<br>לפי שם, לא הכל</p>
+      <p class="why"><small>למה</small>הפקודה <code>git add -A</code><br>מכניסה גם סודות</p>
+    </div><div class="chev-wrap" data-step="3"><i class="chev"></i></div>
+    <div class="station" data-step="3">
+      <div class="sbox" style="background:var(--purple);color:#fff"><span class="num">03</span>
+        <div><span class="t">לבדוק</span><code>test-runner</code></div></div>
+      <p class="rule"><small>הכלל</small>"סיימתי" רק אחרי<br>בדיקה שיכלה ליפול</p>
+      <p class="why"><small>למה</small>1142 בדיקות<br>על העותק השגוי</p>
+    </div><div class="chev-wrap" data-step="4"><i class="chev"></i></div>
+    <div class="station" data-step="4">
+      <div class="sbox" style="background:var(--pink);color:#fff"><span class="num">04</span>
+        <div><span class="t">לטעון טענה</span><code>claim-checker</code></div></div>
+      <p class="rule"><small>הכלל</small>בודקים מול המקור<br>לפני שמפרסמים</p>
+      <p class="why"><small>למה</small>נערך קובץ אחר<br>עם אותו שם</p>
+    </div><div class="chev-wrap" data-step="5"><i class="chev"></i></div>
+    <div class="station" data-step="5">
+      <div class="sbox" style="background:var(--blue-box);color:#fff"><span class="num">05</span>
+        <div><span class="t">לסגור</span><code>finish-task</code></div></div>
+      <p class="rule"><small>הכלל</small>מיזוג לא סוגר<br>את הכרטיס</p>
+      <p class="why"><small>למה</small>מיזוג הוא לא פריסה</p>
+    </div><div class="chev-wrap" data-step="6"><i class="chev"></i></div>
+    <div class="station" data-step="6">
+      <div class="sbox" style="background:var(--teal-dark);color:#fff"><span class="num">06</span>
+        <div><span class="t">ללמוד</span><code>contribute</code></div></div>
+      <p class="rule"><small>הכלל</small>לקח שכדאי לכולם<br>עובר לפלייבוק</p>
+      <p class="why"><small>למה</small>118 לקחים פרטיים,<br>אפס בפלייבוק</p>
+    </div></div>
+  <div class="callout" data-step="6"><span class="ours you">אצלכם</span><span>ליד כל כלל, כתבו את הטעות שהוא מונע.</span></div>
+  <div class="pagenum">24</div>
+</section>
+<section class="slide" data-n="25" aria-label="מה נשאר אצלכם">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span></div>
+  <h2 class="title-lg reveal" data-d="1">מה נשאר באחריות שלכם, גם כשהכל עובד</h2>
+  <p class="lead reveal" data-d="2">הכללים, הנהלים והסוכנים מצמצמים טעויות, אבל ארבעה דברים נשארים החלטה של אדם:</p>
+  <div class="four">
+    <div class="card reveal" data-d="3"><h4>היקף והחלטות</h4><p>מה בכלל עושים, ואיזו חלופה בוחרים.</p><p class="muted">הסוכן מציע ושואל, וההחלטה שלכם.</p></div><div class="card reveal" data-d="4"><h4>הרשאות</h4><p>מה הסוכן רשאי להריץ, ומה לקרוא.</p><p class="muted">כל טקסט שהוא קורא יכול להכיל הוראות שמישהו שתל.</p></div><div class="card reveal" data-d="5"><h4>merge conflicts</h4><p>הסוכן מציע, ואדם מחליט מה נשאר.</p><p class="muted">אצלנו התנגשות היא לרוב ענף שעוד לא מוזג.</p></div>
+    <div class="card warn reveal" data-d="6"><h4 class="red">שיפוט איכות</h4><p>הבדיקה האוטומטית אמרה "תקין" על המצגת הזו, והשקף הציג:</p>
+      <div class="flip" data-fx="flip" dir="ltr" aria-hidden="true"><span style="--i:0;--d:10">/</span><span style="--i:1;--d:8">s</span><span style="--i:2;--d:6">t</span><span style="--i:3;--d:4">a</span><span style="--i:4;--d:2">r</span><span style="--i:5;--d:0">t</span><span style="--i:6;--d:-2">-</span><span style="--i:7;--d:-4">t</span><span style="--i:8;--d:-6">a</span><span style="--i:9;--d:-8">s</span><span style="--i:10;--d:-10">k</span></div>
+      <img class="bug" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA2gAAAB0CAIAAAB/iIYXAACEDElEQVR42uz917fcWZYeiO29zzk/F/56B28ykbZ8sbqqHcnuoSiRs6gZLelVD/q7tPQ6Q9GIXFwcNrub7cpXV1okEv56Hz7iZ47ZejgRgQtvEkggq2IXFjKrCoi4x2/z7e/DzW4Tpja1qU1talOb2tSmNrWnGU2nYGpTm9rUpja1qU1talPHcWpTm9rUpja1qU1talPHcWpTm9rUpja1qU1talPHcWpTm9rUpja1qU1talPHcWpTm9rUpja1qU1talPHcWpTm9rUpja1qU1talPHcWpTm9rUpja1qU1talObOo5Tm9rUpja1qU1talObOo5Tm9rUpja1qU1talObOo5Tm9rUpja1qU1talObOo5Tm9rUpja1qU1talObOo5Tm9rUpja1qU1talObOo5Tm9rUpja1qU1talObOo5Tm9rUpja1qU1talOb2tRxnNrUpja1qU1talOb2tRxnNrUpja1qU1talOb2tRxnNrUpja1qU1talOb2tRxnNrUpja1qU1talOb2tRxnNrUpja1qU1talOb2tRxnNrUpja1qU1talOb2tRxnNrUpja1qU1talOb2tSmjuPUpja1qU1talOb2tSe0eSb/MPx5LeRIU5XbGpTm9rvh/F9/5zeflOb2tSmjuPTLk1mZj7pODJ6m67b1KY2td9tr5GZ4eT9N739pja1qU0dxycaIQoSdOKeZGDH7B70Jqc2talN7XfNBBEhIQICTm4/ZnbT229qU5va1HF8ZLoRARDhnuOIwAzM/p9Tm9rUpva7bzTOMjpGBLbgEGAaOU9talObOo73GQIigrG2n2fa2km6USApIZUQAmlasPm6sVbMME5+TMc7telsv+I54cJaba221rIDAEISiOMLEB9Af09talOb2u+p4+hxjYEQhNhN0xvHe/vdDgMwgHW2EsbLlfpipVqNYkkCAJxzU8zPq37APNKKAZABEX63UVa/b+OdzvabdgEKRAAc6vyw3zvod1vDwVDngFgJovlSZaFcnUlKUsrp7Te1qU1t6jiOzLGTRFKIfpF9srP5+d6WdczA2tnFcu3bK6dDJctBSEICgJsuILzy7K8gFESEyADOOfs7jTH9fRvvdLbfrNvPuUgFUojjYe/T3c3P9rZaw0GvyLQ1Z+pzPzxz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" alt="תצלום מהמצגת שבו הפקודה start-task מוצגת הפוך, כמו ksat-trats">
+      <p class="meant">התכוונו: <code>/start-task</code></p><p class="red"><b>רק מי שהסתכל ראה.</b></p></div>
+  </div>
+  <div class="callout reveal" data-d="7"><span><b>הסוכן עובד מהר, אבל האחריות על מה שיוצא היא שלכם.</b></span></div>
+  <div class="pagenum">25</div>
+</section>
+<section class="slide dark" data-n="26" aria-label="חמישה הרגלים למחר">
+  
+  <div class="blob" style="width:560px;height:560px;bottom:-240px;left:-240px;background:var(--navy2)"></div><h2 class="title-lg reveal" data-d="1">חמישה הרגלים למחר</h2>
+  <div class="habits"><div class="habit key" data-step="1"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><div><h3>לפני שמקבלים מסקנה מהסוכן, שואלים על איזו הנחה היא נשענת.</h3><p>ובודקים בעצמכם: על מה זה רץ, ומה היה צריך לצאת.</p></div></div><div class="habit" data-step="2"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><div><h3>לפני שאומרים "סיימתי": איזו בדיקה יכלה להיכשל, ולא נכשלה?</h3><p>אם אין בדיקה כזו, עוד לא בדקתם.</p></div></div><div class="habit" data-step="2"><span class="badge " style="background:var(--purple);color:#fff">3</span><div><h3>לכל משימה סשן נקי.</h3><p>גם שני תיקונים שלא עזרו הם סיבה להתחיל מחדש.</p></div></div><div class="habit" data-step="2"><span class="badge " style="background:var(--pink);color:#fff">4</span><div><h3>שינוי שאי אפשר לתאר במשפט אחד מתחיל בתוכנית.</h3><p>לחקור, לתכנן, ורק אז לכתוב קוד.</p></div></div><div class="habit" data-step="3"><span class="badge " style="background:var(--blue-box);color:#fff">5</span><div><h3>טעות שחזרה פעמיים הופכת לכלל.</h3><p>בקובץ ההנחיות של הפרויקט, כדי שיגיע לכל הצוות.</p></div></div></div>
+  <div class="pagenum">26</div>
+</section>
+<section class="slide" data-n="27" aria-label="איך מתחילים">
+  
+  <h2 class="title-lg reveal" data-d="1">איך מתחילים מחר בבוקר, בכל פרויקט</h2>
+  <div class="start">
+    <div class="srow reveal" data-d="2"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><div><h3>קובץ הנחיות אחד במאגר</h3><p>קצר ומעשי: איך בונים, איך מריצים בדיקות, ומה אסור. כותבים אותו פעם אחת:</p>
+      <div class="chips"><code class="chip">AGENTS.md</code><span class="chip-note">בכל כלי, הגדרה אחת או שורה אחת מחברת אליו.</span></div></div></div>
+    <div class="srow reveal" data-d="3"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><div><h3>טעות שחזרה פעמיים הופכת לשורה בקובץ</h3><p>באותו יום, דרך המאגר, כדי שתגיע לכל הצוות. למשל, אחרי המקרה שראינו:</p>
+      <p class="quote">בדיווח על בדיקות כותבים איפה הן רצו, וכמה רצו לעומת לפני השינוי.</p></div></div>
+    <div class="srow reveal" data-d="4"><span class="badge " style="background:var(--purple);color:#fff">3</span><div><h3>מה שחייב לקרות, רץ לבד</h3><p>בדיקה שרצה בכל פעם, בלי שמישהו צריך לזכור:</p>
+      <div class="chips three"><code class="chip">pre-commit</code><code class="chip">CI</code><code class="chip">hooks</code></div></div></div>
+  </div>
+  <div class="ask reveal" data-d="5">השבוע, הוסיפו את השורה מהדוגמה לקובץ ההנחיות שלכם.</div>
+  <div class="pagenum">27</div>
+</section>
+<section class="slide dark" data-n="28" aria-label="שאלות">
+  
+  
+  <div class="blob" style="width:420px;height:420px;top:-140px;left:-60px;background:var(--navy2)"></div>
+  <div class="blob" style="width:280px;height:280px;top:-90px;left:20px;background:var(--teal);opacity:.85"></div>
+  <div class="blob" style="width:520px;height:520px;bottom:-220px;right:-140px;background:var(--navy2);opacity:.6"></div>
+  <div class="hero-line"><span class="title-hero">שאלות?</span></div>
+  <p class="lead hero-sub reveal" data-d="2">אפשר גם בצ'אט.</p>
+  <p class="last-q reveal" data-d="3">ומה ההנחה שלא אמרתם היום?</p>
+  <div class="pagenum">28</div>
+</section>
+<section class="slide" data-n="29" aria-label="נספח: מילון מושגים">
+  
+  <p class="kicker reveal" data-d="1">נספח</p><h2 class="title-lg reveal" data-d="1">מילון מושגים</h2>
+  <div class="gloss"><div class="g reveal" data-d="2"><h4>מודל שפה (LLM)</h4><p>מנבא את ההמשך הסביר של טקסט וקוד</p></div><div class="g reveal" data-d="3"><h4>טוקן (token)</h4><p>יחידת טקסט, לרוב חלק ממילה</p></div><div class="g reveal" data-d="4"><h4>חלון ההקשר</h4><p>כל מה שהמודל רואה כרגע, במקום מוגבל</p></div><div class="g reveal" data-d="5"><h4>context rot</h4><p>ירידה באיכות ככל שהחלון מתמלא</p></div><div class="g reveal" data-d="6"><h4>סוכן (agent)</h4><p>מודל עם כלים, שעובד בלולאה</p></div><div class="g reveal" data-d="7"><h4>harness</h4><p>התוכנה סביב המודל, כמו Claude Code</p></div><div class="g reveal" data-d="8"><h4>worktree</h4><p>עותק עבודה נוסף של אותו מאגר</p></div><div class="g reveal" data-d="9"><h4>plan mode</h4><p>רק קריאה ותכנון, בלי שינוי קבצים</p></div><div class="g reveal" data-d="10"><h4>סוכן משנה (subagent)</h4><p>סוכן נפרד, שמחזיר רק מסקנה</p></div><div class="g reveal" data-d="11"><h4>hook</h4><p>סקריפט שתמיד רץ, ברגע קבוע</p></div><div class="g reveal" data-d="12"><h4>skill</h4><p>נוהל כתוב שנטען במלואו רק כשמפעילים</p></div><div class="g reveal" data-d="13"><h4>harness engineering</h4><p>בניית הסביבה, כך שטעות לא חוזרת</p></div></div>
+  <div class="pagenum">29</div>
+</section>
+<section class="slide" data-n="30" aria-label="נספח: שאלות נפוצות">
+  
+  <p class="kicker reveal" data-d="1">נספח</p><h2 class="title-lg reveal" data-d="1">שאלות נפוצות</h2>
+  <div class="faq"><div class="qa reveal" data-d="2"><h4>זה מחליף סקירת קוד?</h4><p>לא. הסוכן מקצר את הדרך לקוד, אבל הבדיקה והשיפוט נשארים אצל אדם.</p></div><div class="qa reveal" data-d="3"><h4>האם Copilot או Cursor עובדים באותה צורה?</h4><p>כן. העקרונות לא תלויים בכלי, וקובץ הנחיות אחד יכול לשרת את כולם. אצלנו Claude Code מריץ גם את האוטומציה.</p></div><div class="qa reveal" data-d="4"><h4>מה עם סודות ואבטחה?</h4><p>לא מכניסים סודות להקשר, מוסיפים קבצים לפי נתיב, והרשאות וגם hooks חוסמים פעולות מסוכנות.</p></div><div class="qa reveal" data-d="5"><h4>הסוכן טועה שוב ושוב?</h4><p>אחרי שני תיקונים פותחים סשן נקי עם בקשה טובה יותר. טעות שחוזרת הופכת לכלל.</p></div><div class="qa reveal" data-d="6"><h4>איך מתחילים בצוות שלנו?</h4><p>קובץ הנחיות אחד במאגר, טעות שחוזרת הופכת לשורה בו, ומה שחייב לקרות רץ לבד.</p></div></div>
+  <div class="pagenum">30</div>
+</section>
+<div id="dots"></div>
+</div></div>
+<div id="ui"><button id="btn-presenter" type="button" title="P">חלון מנחה</button><button id="btn-fs" type="button" title="F">מסך מלא</button></div>
+<div id="blank"></div>
+<div id="laser"></div>
+<div id="presenter"></div>
+<pre id="check-out" hidden></pre>
+<script type="application/json" id="notes">[{"n":1,"title":"פתיחה: הייתם ממזגים?","start":0,"sec":23.5,"cut":false,"appendix":false,"script":[]},{"n":2,"title":"פתיחה","start":23.5,"sec":34,"cut":false,"appendix":false,"script":[]},{"n":3,"title":"מה בהרצאה הזו, ומה בהרצאות אחרות","start":57.5,"sec":52.5,"cut":false,"appendix":false,"script":[]},{"n":4,"title":"המפה והמטרות","start":110,"sec":47.5,"cut":false,"appendix":false,"script":[]},{"n":5,"title":"חלק 1: היסודות","start":157.5,"sec":19,"cut":false,"appendix":false,"script":[]},{"n":6,"title":"מודל שפה","start":176.5,"sec":70,"cut":false,"appendix":false,"script":[]},{"n":7,"title":"חלון ההקשר","start":246.5,"sec":65.5,"cut":false,"appendix":false,"script":[]},{"n":8,"title":"סוכן","start":312,"sec":73.5,"cut":false,"appendix":false,"script":[]},{"n":9,"title":"המקרה: אתם הייתם ממזגים?","start":385.5,"sec":30,"cut":false,"appendix":false,"script":[]},{"n":10,"title":"התשובה: העותק הלא נכון","start":415.5,"sec":110,"cut":false,"appendix":false,"script":[]},{"n":11,"title":"שלושה סוגים של טעות","start":525.5,"sec":48.5,"cut":false,"appendix":false,"script":[]},{"n":12,"title":"חלק 2: שיטות העבודה","start":574,"sec":21.5,"cut":false,"appendix":false,"script":[]},{"n":13,"title":"שיטה 1: בדיקה","start":595.5,"sec":84,"cut":false,"appendix":false,"script":[]},{"n":14,"title":"שיטה 2: תכנון","start":679.5,"sec":89.5,"cut":false,"appendix":false,"script":[]},{"n":15,"title":"שיטה 3: ספציפיות","start":769,"sec":57.5,"cut":false,"appendix":false,"script":[]},{"n":16,"title":"שיטה 4: ניהול ההקשר","start":826.5,"sec":118,"cut":false,"appendix":false,"script":[]},{"n":17,"title":"שיטה 5: כללים קשיחים","start":944.5,"sec":70,"cut":true,"appendix":false,"script":[]},{"n":18,"title":"שיטה 6: כל טעות לכלל","start":1014.5,"sec":84,"cut":false,"appendix":false,"script":[]},{"n":19,"title":"חמש טעויות נפוצות","start":1098.5,"sec":30,"cut":true,"appendix":false,"script":[]},{"n":20,"title":"חלק 3: איך אנחנו עובדים","start":1128.5,"sec":23,"cut":false,"appendix":false,"script":[]},{"n":21,"title":"הפלייבוק","start":1151.5,"sec":56.5,"cut":false,"appendix":false,"script":[]},{"n":22,"title":"מפתח חדש אצלנו","start":1208,"sec":47,"cut":false,"appendix":false,"script":[]},{"n":23,"title":"מהכרטיס ועד המיזוג","start":1255,"sec":175.1,"cut":false,"appendix":false,"script":[]},{"n":24,"title":"יום עבודה אצלנו","start":1430.1,"sec":43.5,"cut":false,"appendix":false,"script":[]},{"n":25,"title":"מה נשאר אצלכם","start":1473.6,"sec":70,"cut":false,"appendix":false,"script":[]},{"n":26,"title":"חמישה הרגלים למחר","start":1543.6,"sec":60.5,"cut":false,"appendix":false,"script":[]},{"n":27,"title":"איך מתחילים","start":1604.1,"sec":75,"cut":false,"appendix":false,"script":[]},{"n":28,"title":"שאלות","start":1679.1,"sec":14.5,"cut":false,"appendix":false,"script":[]},{"n":29,"title":"נספח: מילון מושגים","start":1693.6,"sec":0,"cut":false,"appendix":true,"script":[]},{"n":30,"title":"נספח: שאלות נפוצות","start":1693.6,"sec":0,"cut":false,"appendix":true,"script":[]}]</script>
+<script>
+(() => {
+  const NOTES = JSON.parse(document.getElementById('notes').textContent);
+  const hash = location.hash.slice(1);
+  const flags = new Set(hash.split('&'));
+  const MODE = {
+    presenter: flags.has('presenter'),
+    embed: flags.has('embed'),
+    check: flags.has('check'),
+  };
+  MODE.static = flags.has('static') || MODE.embed || MODE.check;
+  // no motion: screenshots, previews, printing, or a viewer who asked the system for less motion
+  const CALM = MODE.static || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const mmss = (sec) => Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0');
+
+  if (MODE.presenter) { presenter(); return; }
+
+  const deck = document.getElementById('deck');
+  const slides = [...deck.querySelectorAll('.slide')];
+  const dotsWrap = document.getElementById('dots');
+  const bar = document.getElementById('progress-bar');
+  const laser = document.getElementById('laser');
+  if (MODE.static) document.body.classList.add('static');
+  if (MODE.embed) document.body.classList.add('embed');
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.addEventListener('click', (e) => { e.stopPropagation(); jump(i); });
+    dotsWrap.appendChild(d);
+  });
+  const dots = [...dotsWrap.children];
+
+  // A slide's parts shown one press at a time carry data-step="1", "2" ... A press can also stop a running
+  // loop (data-stop) or bring a box forward (data-emph); both count as a part of the slide.
+  const stepsOf = (s) => {
+    if (s.__steps === undefined) s.__steps = [...s.querySelectorAll('[data-step], [data-stop], [data-emph], [data-play]')]
+      .reduce((m, e) => Math.max(m, +(e.dataset.step || e.dataset.stop || e.dataset.emph || e.dataset.play)), 0);
+    return s.__steps;
+  };
+
+  const first = parseInt(hash, 10);
+  let current = Number.isFinite(first) ? Math.min(slides.length - 1, Math.max(0, first - 1)) : 0;
+  let step = stepsOf(slides[current]);
+  let presenterWin = null;
+
+  function fit() {
+    if (MODE.check) { deck.style.transform = 'none'; return; }
+    // a window can report no size while it opens; scale once it has one
+    const s = Math.min(innerWidth / 1600, innerHeight / 900);
+    deck.style.transform = 'scale(' + (s > 0 ? s : 1) + ')';
+  }
+  addEventListener('resize', fit);
+  fit();
+
+  // timers and frames that belong to the slide on screen, stopped when it leaves
+  const timers = [], frames = [];
+  const later = (ms, fn) => timers.push(setTimeout(fn, ms));
+  function stopAll() {
+    timers.splice(0).forEach(clearTimeout);
+    frames.splice(0).forEach(cancelAnimationFrame);
+  }
+
+  function build(el) {
+    const items = [...el.querySelectorAll('.reveal')];
+    if (MODE.static) { items.forEach((it) => it.classList.add('show')); return; }
+    items.forEach((it) => it.classList.remove('show'));
+    items.forEach((it) => later(140 + (parseInt(it.dataset.d, 10) || 1) * 90, () => it.classList.add('show')));
+  }
+  function showSteps(s, n, animate) {
+    s.querySelectorAll('[data-step]').forEach((e) => {
+      const on = +e.dataset.step <= n, was = e.classList.contains('on');
+      e.classList.toggle('on', on);
+      if (on && !was && animate) e.querySelectorAll('[data-count]').forEach(countUp);
+    });
+    s.querySelectorAll('[data-emph]').forEach((e) => e.classList.toggle('emph', n >= +e.dataset.emph));
+  }
+  // A loop that a press stops: stopped from its step on, running again when back goes below it.
+  // An explanation that a press plays: played from its step on, back at its start below it. A slide arrived at
+  // past that step (a jump, a reload, back from the next slide) shows it finished instead of playing it again.
+  function applyStops(s, n, arrived) {
+    s.querySelectorAll('[data-stop]').forEach((e) => {
+      if (n >= +e.dataset.stop) { if (e.__stop) e.__stop(); } else if (e.__start) e.__start();
+    });
+    s.querySelectorAll('[data-play]').forEach((e) => {
+      if (n >= +e.dataset.play) { if (e.__play) e.__play(arrived); } else if (e.__reset) e.__reset();
+    });
+  }
+
+  // ---------------------------------------------------------------- effects
+  function countUp(el) {
+    const to = +el.dataset.count, from = el.dataset.from !== undefined ? +el.dataset.from : 0;
+    if (CALM) { el.textContent = to; return; }
+    el.textContent = from;
+    const t0 = performance.now(), dur = 1100;
+    const tick = (t) => {
+      const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(from + (to - from) * e);
+      if (p < 1) frames.push(requestAnimationFrame(tick));
+    };
+    frames.push(requestAnimationFrame(tick));
+  }
+  // the test result appears the way a terminal prints it
+  function typeOut(el) {
+    const text = el.dataset.text;
+    if (CALM) { el.textContent = text; el.classList.remove('typing'); return; }
+    el.textContent = '';
+    el.classList.add('typing');
+    let i = 0;
+    const next = () => {
+      el.textContent = text.slice(0, ++i);
+      if (i < text.length) later(36, next); else later(300, () => el.classList.remove('typing'));
+    };
+    later(650, next);
+  }
+  // The way back under a row: from the middle of one element down, across and up into another, in the
+  // SVG's own pixels, so the arrowhead and the dot that runs along it are never stretched.
+  const scale = () => deck.getBoundingClientRect().width / 1600 || 1;
+  function track(svg, fromEl, toEl) {
+    const k = scale(), c = svg.getBoundingClientRect(), f = fromEl.getBoundingClientRect(), t = toEl.getBoundingClientRect();
+    const W = Math.round(c.width / k), H = Math.round(c.height / k);
+    const xf = (f.left + f.width / 2 - c.left) / k, xt = (t.left + t.width / 2 - c.left) / k;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.removeAttribute('preserveAspectRatio');
+    const p = svg.querySelector('.track'), head = svg.querySelector('.head');
+    p.setAttribute('d', 'M' + xf + ' 2 V' + (H - 10) + ' H' + xt + ' V9');
+    head.setAttribute('d', 'M' + (xt - 9) + ' 13 L' + xt + ' 3 L' + (xt + 9) + ' 13');
+    return p;
+  }
+  // a dot along a path, once, unless the loop it belongs to is stopped on the way
+  function moveAlong(path, dot, ms, done, cancelled) {
+    const L = path.getTotalLength(), t0 = performance.now();
+    dot.classList.add('on');
+    const tick = (t) => {
+      if (cancelled && cancelled()) { dot.classList.remove('on'); return; }
+      const p = Math.min(1, (t - t0) / ms), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+      const pt = path.getPointAtLength(L * e);
+      dot.setAttribute('cx', pt.x);
+      dot.setAttribute('cy', pt.y);
+      if (p < 1) frames.push(requestAnimationFrame(tick)); else { dot.classList.remove('on'); if (done) done(); }
+    };
+    frames.push(requestAnimationFrame(tick));
+  }
+  // The agent's loop: each station in turn, the arrow it passes lit, then a dot runs back to the first.
+  // It goes on until a press stops it on "checks the result", or the slide is left.
+  function runLoop(loop) {
+    const boxes = [...loop.querySelectorAll('.lbox')], chevs = [...loop.querySelectorAll('.loop-row .chev-wrap')];
+    const svg = loop.querySelector('.loop-back');
+    const path = track(svg, boxes[boxes.length - 1], boxes[0]), dot = svg.querySelector('.runner');
+    const lit = (k) => boxes.forEach((b, j) => b.classList.toggle('lit', j === k));
+    const pass = (k) => chevs.forEach((c, j) => c.classList.toggle('lit', j === k));
+    loop.classList.remove('running');
+    svg.classList.remove('returning');
+    lit(-1);
+    pass(-1);
+    const STEP = 850;
+    let stopped = false;
+    const lt = (ms, fn) => later(ms, () => { if (!stopped) fn(); });
+    const cycle = () => {
+      boxes.forEach((_, i) => lt(i * STEP, () => { lit(i); pass(i - 1); }));
+      lt(boxes.length * STEP - 250, () => pass(-1));
+      lt(boxes.length * STEP, () => {
+        svg.classList.add('returning');
+        moveAlong(path, dot, 1100, () => svg.classList.remove('returning'), () => stopped);
+      });
+      lt(boxes.length * STEP + 1200, cycle);
+    };
+    loop.__stop = () => {
+      stopped = true;
+      loop.classList.remove('running');
+      svg.classList.remove('returning');
+      dot.classList.remove('on');
+      pass(-1);
+      lit(boxes.length - 1);
+    };
+    loop.__start = () => {
+      if (!stopped) return;
+      stopped = false;
+      lit(-1);
+      if (!CALM) lt(300, () => { loop.classList.add('running'); cycle(); });
+    };
+    if (CALM) return;
+    lt(500, () => { loop.classList.add('running'); cycle(); });
+  }
+  // The playbook: the source lights, a packet runs to the sync script, it lights, a packet runs to the
+  // working folders, they light, and a dot runs back along the gold way to the source. Until the slide is left.
+  function runFlow(pb) {
+    const cols = [...pb.querySelectorAll('.pb-col')], gaps = [...pb.querySelectorAll('.flow-gap')];
+    const back = pb.parentElement.querySelector('.pb-back');
+    const path = track(back, cols[cols.length - 1], cols[0]), dot = back.querySelector('.runner');
+    const glow = (k) => cols.forEach((c, j) => c.classList.toggle('glow', j === k));
+    const send = (gap) => {
+      const p = gap.querySelector('.packet');
+      p.animate([{ transform: 'translateX(26px)', opacity: 0 }, { opacity: 1, offset: 0.2 }, { opacity: 1, offset: 0.8 },
+                 { transform: 'translateX(-26px)', opacity: 0 }], { duration: 700, easing: 'ease-in-out' });
+    };
+    glow(-1);
+    back.classList.remove('returning');
+    if (CALM) return;
+    const cycle = () => {
+      later(0, () => glow(0));
+      later(450, () => send(gaps[0]));
+      later(1100, () => glow(1));
+      later(1550, () => send(gaps[1]));
+      later(2200, () => glow(2));
+      later(2900, () => {
+        glow(-1);
+        back.classList.add('returning');
+        moveAlong(path, dot, 1400, () => back.classList.remove('returning'));
+      });
+      later(4500, cycle);
+    };
+    later(600, cycle);
+  }
+  // The fault, played: the cd is typed in one terminal, the shared folder moves both to the other copy,
+  // the tests are typed in the second terminal and pass, and the 52 new ones are marked as never run.
+  function prepMech(m) {
+    const cmds = [...m.querySelectorAll('.cmd')];
+    let run = 0;
+    m.__reset = () => { run++; m.classList.remove('moved', 'ran'); cmds.forEach((c) => { c.textContent = ''; c.classList.remove('typing'); }); };
+    m.__play = (atEnd) => {
+      if (m.classList.contains('moved') || m.__playing === run) return;
+      const me = ++run;
+      m.__playing = me;
+      if (CALM || atEnd) { cmds.forEach((c) => (c.textContent = c.dataset.text)); m.classList.add('moved', 'ran'); return; }
+      // paced for the sentence said over it: the cd, a beat on the switch, then the tests
+      const KEY = 70, at = (ms, fn) => later(ms, () => { if (run === me) fn(); });
+      const type = (c, t0) => {
+        const t = c.dataset.text;
+        at(t0, () => c.classList.add('typing'));
+        [...t].forEach((_, i) => at(t0 + i * KEY, () => { c.textContent = t.slice(0, i + 1); }));
+        at(t0 + t.length * KEY + 250, () => c.classList.remove('typing'));
+        return t0 + t.length * KEY;
+      };
+      const moved = type(cmds[0], 300) + 900;
+      at(moved, () => m.classList.add('moved'));
+      const ran = type(cmds[1], moved + 2000) + 700;
+      at(ran, () => m.classList.add('ran'));
+    };
+    m.__reset();
+  }
+  // The film runs in its own page inside the slide and is told what its slide wants: 'ready' (its first frame, the
+  // cursor waiting), 'play', or 'end' (its last frame, for a slide arrived at past the press). A page that has not
+  // loaded yet misses the message, so on loading it says hello and is told again.
+  function tellFilm(w, what) {
+    const f = w.querySelector('iframe');
+    try { f.contentWindow.postMessage({ film: what }, '*'); } catch (e) { /* not loaded: it asks when it is */ }
+  }
+  function prepFilm(w) {
+    w.__play = (atEnd) => { w.dataset.film = atEnd || CALM ? 'end' : 'play'; tellFilm(w, w.dataset.film); };
+    w.__reset = () => { w.dataset.film = 'ready'; tellFilm(w, 'ready'); };
+  }
+  addEventListener('message', (e) => {
+    const d = e.data;
+    if (!d || typeof d.film !== 'string') return;
+    const w = [...document.querySelectorAll('.film-wrap')].find((x) => x.querySelector('iframe').contentWindow === e.source);
+    if (!w) return;
+    if (d.length) w.dataset.filmLength = d.length;
+    if (d.film === 'hello') tellFilm(w, w.dataset.film || 'ready');
+    else if (d.film === 'state') w.dataset.filmState = d.state;
+  });
+  // "/start-task" turns into "ksat-trats/", letter by letter, as it did on the slide
+  function runFlip(el) {
+    el.classList.remove('flipped');
+    if (CALM) { el.classList.add('flipped'); return; }
+    later(1300, () => el.classList.add('flipped'));
+  }
+  function startFx(s) {
+    s.querySelectorAll('[data-fx="loop"]').forEach(runLoop);
+    s.querySelectorAll('[data-fx="flow"]').forEach(runFlow);
+    s.querySelectorAll('[data-fx="mech"]').forEach(prepMech);
+    s.querySelectorAll('[data-fx="film"]').forEach(prepFilm);
+    s.querySelectorAll('.typeout').forEach(typeOut);
+    s.querySelectorAll('[data-fx="flip"]').forEach(runFlip);
+    s.querySelectorAll('[data-count]').forEach((el) => {
+      const st = el.closest('[data-step]');
+      if (st && !st.classList.contains('on')) { el.textContent = el.dataset.from !== undefined ? el.dataset.from : 0; return; }
+      if (CALM) { countUp(el); return; }
+      el.textContent = el.dataset.from !== undefined ? el.dataset.from : 0;
+      later(500, () => countUp(el));
+    });
+  }
+
+  // ---------------------------------------------------------------- zoom and laser
+  let zoomed = null;
+  function zoomTo(target) {
+    const s = slides[current];
+    const block = target.closest('.terminal, .gap, .lbox, .loop, .bar, .station, .flow, .pb-col, .pb, .card, .type, .types, .row, .habit, .m-row, .cmp-row, .ncard, .g, .qa, .alert, .callout, .ask, .srow, img') || target;
+    const r = block.getBoundingClientRect(), sr = s.getBoundingClientRect();
+    const k0 = sr.width / 1600;                                  // the deck's current scale on this screen
+    const x = (r.left - sr.left) / k0, y = (r.top - sr.top) / k0, w = r.width / k0, h = r.height / k0;
+    const k = Math.min(1600 * 0.86 / w, 900 * 0.78 / h, 3);
+    if (k <= 1.05) return;                                       // already about as big as it gets
+    s.style.transformOrigin = '0 0';
+    s.style.transform = 'translate(' + (800 - (x + w / 2) * k) + 'px,' + (450 - (y + h / 2) * k) + 'px) scale(' + k + ')';
+    zoomed = s;
+    document.body.classList.add('zoomed');
+  }
+  function resetZoom() {
+    if (!zoomed) return;
+    zoomed.style.transform = '';
+    zoomed.style.transformOrigin = '';
+    zoomed = null;
+    document.body.classList.remove('zoomed');
+  }
+  function setLaser(on) { document.body.classList.toggle('laser', on); }
+
+  // ---------------------------------------------------------------- navigation
+  function render() {
+    stopAll();
+    resetZoom();
+    slides.forEach((el, i) => el.classList.toggle('active', i === current));
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    bar.style.width = ((current + 1) / slides.length * 100) + '%';
+    const s = slides[current];
+    deck.classList.toggle('film-on', s.classList.contains('film'));
+    build(s);
+    // a loop's controls from an earlier visit belong to timers that are gone
+    s.querySelectorAll('[data-stop], [data-play]').forEach((e) => { e.__stop = e.__start = e.__play = e.__reset = null; e.__playing = undefined; });
+    showSteps(s, MODE.static ? 1e9 : step, false);
+    startFx(s);
+    applyStops(s, MODE.static ? 1e9 : step, true);
+    // the slide number in the address, so a reload stays on the slide; a sandboxed preview (an app's file viewer)
+    // refuses to change its address and throws, which must not stop the deck
+    if (!MODE.embed && !MODE.check) { try { history.replaceState(null, '', '#' + (current + 1)); } catch (e) { /* no address to keep */ } }
+    tell();
+  }
+  function tell() {
+    if (presenterWin && !presenterWin.closed) presenterWin.postMessage({ type: 'state', current, step, steps: stepsOf(slides[current]) }, '*');
+  }
+  // forward shows the slide's next part before the next slide; back hides it before the slide before
+  function go(dir) {
+    resetZoom();
+    const s = slides[current], total = stepsOf(s);
+    if (!MODE.static && dir > 0 && step < total) { step++; showSteps(s, step, true); applyStops(s, step); tell(); return; }
+    if (!MODE.static && dir < 0 && step > 0) { step--; showSteps(s, step, false); applyStops(s, step); tell(); return; }
+    const n = current + dir;
+    if (n < 0 || n >= slides.length) return;
+    current = n;
+    step = dir > 0 ? 0 : stepsOf(slides[n]);
+    render();
+  }
+  // a jump shows the whole slide
+  function jump(i) { current = Math.min(slides.length - 1, Math.max(0, i)); step = stepsOf(slides[current]); render(); }
+
+  function openPresenter() {
+    let w = null;
+    try { w = window.open(location.href.split('#')[0] + '#presenter', 'ai-lecture-presenter', 'width=1300,height=820'); } catch (e) { w = null; }
+    if (w) presenterWin = w;
+    else toast('חלון המנחה לא נפתח כאן. פתחו את הקובץ ישירות בדפדפן.');
+  }
+  function toast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+  function toggleFS() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    else document.exitFullscreen();
+  }
+
+  // a slide number put into the address moves there, in the deck and in the presenter window's previews
+  if (!MODE.check) addEventListener('hashchange', () => { const n = parseInt(location.hash.slice(1), 10); if (n) jump(n - 1); });
+  if (!MODE.embed && !MODE.check) {
+    let typed = '';
+    document.addEventListener('keydown', (e) => {
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      const k = e.key;
+      if (/^[0-9]$/.test(k)) { typed += k; return; }                       // a number then Enter jumps to that slide
+      if (k === 'Enter' && typed) { jump(parseInt(typed, 10) - 1); typed = ''; e.preventDefault(); return; }
+      typed = '';
+      if (['ArrowLeft', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(k)) { go(1); e.preventDefault(); }
+      else if (['ArrowRight', 'ArrowUp', 'PageUp', 'Backspace'].includes(k)) { go(-1); e.preventDefault(); }
+      else if (k === 'Home') jump(0);
+      else if (k === 'End') jump(slides.length - 1);
+      else if (k === 'Escape') { resetZoom(); document.body.classList.remove('zoommode'); setLaser(false); }
+      // the same keys on a Hebrew layout: F is כ, P is פ, B is נ, L is ך, Z is ז
+      else if ('fFכ'.includes(k)) toggleFS();
+      else if ('pPפ'.includes(k)) openPresenter();
+      else if ('bBנ.'.includes(k)) document.body.classList.toggle('blank');
+      else if ('lLך'.includes(k)) setLaser(!document.body.classList.contains('laser'));
+      else if ('zZז'.includes(k)) { if (zoomed) resetZoom(); else document.body.classList.toggle('zoommode'); }
+    });
+    // A click anywhere moves on, as in a slide show; back is the right arrow or the presenter window's button.
+    // In zoom mode (Z), or with Alt held, a click enlarges what it lands on; the next click returns.
+    deck.addEventListener('click', (e) => {
+      if (e.target.closest('.dot')) return;
+      if (zoomed) { resetZoom(); return; }
+      if (document.body.classList.contains('zoommode') || e.altKey) {
+        document.body.classList.remove('zoommode');
+        zoomTo(e.target);
+        return;
+      }
+      go(1);
+    });
+    let touchX = null;
+    addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; });
+    addEventListener('touchend', (e) => {
+      if (touchX === null) return;
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 50) go(dx > 0 ? 1 : -1);
+      touchX = null;
+    });
+    document.getElementById('btn-fs').addEventListener('click', toggleFS);
+    document.getElementById('btn-presenter').addEventListener('click', openPresenter);
+    // the laser follows the mouse. The two buttons show only while the mouse is in the bottom-right corner, and
+    // never with the laser or zoom on: pointing at a slide must not put buttons in front of the audience
+    addEventListener('mousemove', (e) => {
+      const b = document.body;
+      if (b.classList.contains('laser')) { laser.style.left = e.clientX + 'px'; laser.style.top = e.clientY + 'px'; }
+      const near = e.clientX > innerWidth - 300 && e.clientY > innerHeight - 110;
+      b.classList.toggle('ui', near && !b.classList.contains('laser') && !b.classList.contains('zoommode') && !zoomed);
+    });
+    addEventListener('message', (e) => {
+      const m = e.data || {};
+      if (m.type === 'hello') { presenterWin = e.source; tell(); }
+      else if (m.type === 'go') go(m.dir);
+      else if (m.type === 'jump') jump(m.i);
+    });
+  }
+
+  render();
+  if (MODE.check) document.fonts.ready.then(runCheck);
+
+  // ---------------------------------------------------------------- layout check
+  // Every slide in turn, everything shown: anything outside the safe area, text cut off by its own
+  // box, and a paragraph whose last line holds a single word. The result goes into <pre id="check-out">.
+  function runCheck() {
+    const out = [];
+    const desc = (el) => el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).join('.') : '') +
+      ' "' + el.textContent.trim().replace(/\s+/g, ' ').slice(0, 60) + '"';
+    for (let i = 0; i < slides.length; i++) {
+      jump(i);
+      const s = slides[i];
+      const dr = deck.getBoundingClientRect();
+      const res = { n: i + 1, overflow: [], clipped: [], orphans: [], overlap: [] };
+      s.querySelectorAll('*').forEach((el) => {
+        // the film fills its slide on purpose, its own page is checked by its own tests, and a title kept for screen
+        // readers is clipped to a point on purpose
+        if (el.closest('.blob') || el.closest('.pagenum') || el.closest('.packet') || el.closest('svg') || el.closest('.film-wrap') ||
+            el.closest('.sr-only')) return;
+        const r = el.getBoundingClientRect();
+        if (!r.width || !r.height) return;
+        const top = r.top - dr.top, bottom = r.bottom - dr.top, left = r.left - dr.left, right = r.right - dr.left;
+        if (top < 20 || bottom > 842 || left < 24 || right > 1576) {
+          res.overflow.push({ el: desc(el), top: Math.round(top), bottom: Math.round(bottom), left: Math.round(left), right: Math.round(right) });
+        }
+        const cs = getComputedStyle(el);
+        if (cs.overflow !== 'visible' && el.scrollHeight > el.clientHeight + 2 && !el.classList.contains('slide') && !el.classList.contains('hero-line')) {
+          res.clipped.push(desc(el));
+        }
+        if (cs.display !== 'inline' && !el.closest('.flip') && [...el.childNodes].some((c) => c.nodeType === 3 && c.data.trim())) {
+          const L = lineWords(el);
+          if (L.length > 1 && L[L.length - 1].length === 1) res.orphans.push({ el: desc(el), last: L[L.length - 1][0] });
+        }
+      });
+      // A slide is a flex column, so content taller than the slide shrinks its parts instead of leaving the safe area:
+      // the parts then overlap, or what is inside one spills out of it. Neither shows up as overflow above.
+      const skip = (el) => el.closest('.blob') || el.closest('.pagenum') || el.closest('.packet') || el.closest('svg') ||
+        el.closest('.film-wrap') || el.closest('.sr-only');
+      const parts = [...s.children].filter((c) => !skip(c) && !['absolute', 'fixed'].includes(getComputedStyle(c).position) &&
+        c.getBoundingClientRect().height);
+      for (let k = 1; k < parts.length; k++) {
+        const a = parts[k - 1].getBoundingClientRect(), b = parts[k].getBoundingClientRect();
+        if (a.bottom > b.top + 2) res.overlap.push({ el: desc(parts[k]), under: desc(parts[k - 1]), by: Math.round(a.bottom - b.top) });
+      }
+      parts.forEach((c) => {
+        const cb = c.getBoundingClientRect();
+        let low = cb.bottom;
+        c.querySelectorAll('*').forEach((d) => {
+          if (skip(d)) return;
+          const r = d.getBoundingClientRect();
+          if (r.width && r.height) low = Math.max(low, r.bottom);
+        });
+        if (low > cb.bottom + 2) res.overlap.push({ el: desc(c), spills: Math.round(low - cb.bottom) });
+      });
+      if (res.overflow.length || res.clipped.length || res.orphans.length || res.overlap.length) out.push(res);
+    }
+    const pre = document.getElementById('check-out');
+    pre.textContent = 'CHECK-RESULT ' + JSON.stringify(out);
+    pre.hidden = false;
+  }
+  // the words of a block, grouped by the line each one starts on
+  function lineWords(el) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const words = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      const re = /\S+/g;
+      let m;
+      while ((m = re.exec(node.data))) {
+        const rg = document.createRange();
+        rg.setStart(node, m.index);
+        rg.setEnd(node, m.index + m[0].length);
+        const rects = rg.getClientRects();
+        if (rects.length) words.push({ w: m[0], top: rects[0].top });
+      }
+    }
+    const lines = [];
+    words.forEach((w) => {
+      const last = lines[lines.length - 1];
+      if (last && Math.abs(last.top - w.top) < 4) last.words.push(w.w);
+      else lines.push({ top: w.top, words: [w.w] });
+    });
+    return lines.map((l) => l.words);
+  }
+
+  // ---------------------------------------------------------------- presenter window
+  function presenter() {
+    document.body.classList.add('presenter');
+    document.title = 'חלון מנחה: ' + document.title;
+    const base = location.href.split('#')[0];
+    const root = document.getElementById('presenter');
+    root.innerHTML =
+      '<div class="p-top">' +
+        '<span class="count" id="p-count"></span><span class="ttl" id="p-title"></span>' +
+        '<span class="steps" id="p-steps"></span>' +
+        '<span class="plan" id="p-plan"></span><span class="clock" id="p-clock">0:00</span>' +
+        '<button id="p-start" type="button">התחל שעון</button><button id="p-reset" type="button">אפס</button>' +
+        '<button id="p-prev" type="button">הקודם</button><button id="p-next" type="button">הבא</button>' +
+      '</div>' +
+      '<div class="p-notes" id="p-notes"></div>' +
+      '<div class="p-side">' +
+        '<div class="p-label">עכשיו על המסך</div><div class="p-frame"><iframe id="p-cur" title="השקף הנוכחי"></iframe></div>' +
+        '<div class="p-label">השקף הבא: <span class="p-next-title" id="p-next-title"></span></div>' +
+        '<div class="p-frame"><iframe id="p-nxt" title="השקף הבא"></iframe></div>' +
+        '<div class="p-keys">מקשים בחלון השקפים: כ מסך מלא, ך מצביע לייזר, ז זום ואז לחיצה על חלק בשקף, נ מסך שחור, מספר ואז אנטר קפיצה לשקף</div>' +
+      '</div>';
+    const $ = (id) => document.getElementById(id);
+    const deckWin = window.opener;
+    let current = -1, t0 = null, acc = 0;
+
+    function send(m) {
+      if (deckWin && !deckWin.closed) deckWin.postMessage(m, '*');
+      else if (m.type === 'go') show(Math.min(NOTES.length - 1, Math.max(0, current + m.dir)), 0, 0);
+    }
+    function fmt(p) { return esc(p).replace(/\[([^\]]*)\]/g, '<span class="dir">[$1]</span>'); }
+    function show(i, stepNow, steps) {
+      if (t0 === null && acc === 0 && i > 0) start();          // the clock starts with the first move on
+      $('p-steps').textContent = steps ? 'חלקים בשקף: ' + stepNow + ' מתוך ' + steps : '';
+      $('p-steps').className = 'steps' + (steps && stepNow < steps ? ' more' : '');
+      if (i === current) return;                                  // a new part of the same slide: the script stays
+      current = i;
+      const m = NOTES[i];
+      $('p-count').textContent = (i + 1) + ' / ' + NOTES.length;
+      $('p-title').textContent = m.title;
+      $('p-plan').textContent = m.appendix ? 'נספח, לא מציגים' : 'מתוכנן מדקה ' + mmss(m.start) + ' עד ' + mmss(m.start + m.sec);
+      const meta = [m.src ? 'מקור: ' + esc(m.src) : '', m.verify ? 'לאמת לפני ההרצאה: ' + esc(m.verify) : ''].filter(Boolean);
+      $('p-notes').innerHTML = (m.cut ? '<span class="p-tag">אפשר לדלג</span>' : '') +
+        m.script.map((p) => '<p>' + fmt(p) + '</p>').join('') +
+        (meta.length ? '<div class="meta">' + meta.join('<br>') + '</div>' : '');
+      $('p-notes').scrollTop = 0;
+      $('p-cur').src = base + '#' + (i + 1) + '&embed';
+      $('p-nxt').src = base + '#' + Math.min(NOTES.length, i + 2) + '&embed';
+      $('p-next-title').textContent = NOTES[i + 1] ? NOTES[i + 1].title : 'סוף ההרצאה';
+      tick();
+    }
+    function elapsed() { return acc + (t0 === null ? 0 : (Date.now() - t0) / 1000); }
+    function start() { if (t0 === null) t0 = Date.now(); $('p-start').textContent = 'עצור שעון'; }
+    function stop() { if (t0 !== null) { acc = elapsed(); t0 = null; } $('p-start').textContent = 'התחל שעון'; }
+    function tick() {
+      if (current < 0) return;
+      const e = elapsed(), m = NOTES[current], c = $('p-clock');
+      c.textContent = mmss(e);
+      c.className = 'clock' + (m.appendix || e === 0 ? '' : e > m.start + m.sec + 15 ? ' late' : e < m.start - 15 ? ' early' : '');
+    }
+    setInterval(tick, 500);
+    $('p-start').addEventListener('click', () => (t0 === null ? start() : stop()));
+    $('p-reset').addEventListener('click', () => { t0 = null; acc = 0; $('p-start').textContent = 'התחל שעון'; tick(); });
+    $('p-prev').addEventListener('click', () => send({ type: 'go', dir: -1 }));
+    $('p-next').addEventListener('click', () => send({ type: 'go', dir: 1 }));
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowLeft', 'ArrowDown', 'PageDown', ' '].includes(e.key)) { send({ type: 'go', dir: 1 }); e.preventDefault(); }
+      else if (['ArrowRight', 'ArrowUp', 'PageUp'].includes(e.key)) { send({ type: 'go', dir: -1 }); e.preventDefault(); }
+    });
+    addEventListener('message', (e) => { if (e.data && e.data.type === 'state') show(e.data.current, e.data.step || 0, e.data.steps || 0); });
+    if (deckWin) deckWin.postMessage({ type: 'hello' }, '*');
+    show(0, 0, 0);
+  }
+})();
+
+</script>
+</body>
+</html>
