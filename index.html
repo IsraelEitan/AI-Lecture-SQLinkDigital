@@ -441,7 +441,61 @@
           border-radius:12px; padding:12px 18px; font:500 15px Rubik, sans-serif; z-index:70; }
   body.blank #blank{ display:block; }
 
+  /* an example behind a concept: the button in a slide's corner, and the panel it opens over the slide */
+  .ex-btn{ position:absolute; left:112px; bottom:30px; z-index:6; display:flex; align-items:center; gap:10px; font:inherit;
+           font-size:19px; font-weight:700; color:var(--navy); background:#fff; border:2px solid var(--navy); border-radius:999px;
+           padding:7px 18px 7px 14px; cursor:pointer; }
+  .ex-btn .ic{ font-family:var(--mono); font-size:17px; background:var(--navy); color:var(--teal-light); border-radius:8px; padding:2px 7px; }
+  .ex-btn:hover, .ex-btn[aria-expanded="true"]{ background:var(--navy); color:#fff; }
+  .dark .ex-btn{ background:var(--navy2); color:#fff; border-color:#334155; }
+  .ex-chip{ cursor:pointer; box-shadow:inset 0 -4px 0 var(--teal); }
+  .ex-chip:hover, .ex-chip[aria-expanded="true"]{ background:var(--teal-dark); }
+  /* as tall as its content, the slide dimmed behind it; the button stays above, since it closes the panel */
+  .ex-panel{ position:absolute; top:52px; left:64px; right:64px; max-height:calc(100% - 122px); z-index:5; background:var(--navy);
+             color:#fff; border-radius:24px; padding:24px 34px 24px; display:flex; flex-direction:column; gap:12px;
+             overflow:hidden; opacity:0; transform:translateY(16px) scale(.985); pointer-events:none;
+             transition:opacity .35s ease, transform .35s ease; }
+  .ex-panel.open{ opacity:1; transform:none; pointer-events:auto;
+                  box-shadow:0 30px 80px rgba(11,18,32,.45), 0 0 0 2400px rgba(11,18,32,.5); }
+  .ex-head{ display:flex; align-items:center; justify-content:space-between; gap:20px; flex:0 0 auto; }
+  .ex-head h3{ font-size:30px; font-weight:800; line-height:1.25; }
+  .ex-head code{ color:var(--teal-light); }
+  .ex-x{ font:inherit; font-size:32px; line-height:1; color:#94A3B8; background:none; border:0; cursor:pointer; padding:0 4px; }
+  .ex-x:hover{ color:#fff; }
+  .ex-body{ display:flex; flex-direction:column; gap:12px; min-height:0; }
+  .ex-file{ background:#0F172A; border:1px solid #23314F; border-radius:14px; overflow:hidden; flex:0 0 auto; }
+  .ex-tab{ display:flex; align-items:center; justify-content:space-between; gap:14px; font-size:17px; color:#94A3B8;
+           background:#16213A; padding:7px 16px; border-bottom:1px solid #23314F; }
+  .ex-path{ display:flex; align-items:center; gap:12px; }
+  .ex-path code{ font-size:17px; color:#CBD5E1; font-weight:500; }
+  .ex-copy{ font:inherit; font-size:14px; color:#94A3B8; background:#1F2B45; border:0; border-radius:8px; padding:3px 10px; cursor:pointer; }
+  .ex-copy:hover{ color:#fff; }
+  .ex-file pre{ margin:0; padding:10px 0 12px; font-family:var(--mono); font-size:21px; line-height:1.42; overflow:hidden; }
+  .ex-panel.two .ex-file pre{ font-size:20px; }
+  .ex-file pre code{ display:block; font-size:inherit; font-weight:500; }
+  .ex-file .ln{ display:block; padding:0 20px; color:#CBD5E1; white-space:pre; min-height:1.42em; }
+  .ex-file .ln.hot{ background:rgba(20,184,166,.16); box-shadow:inset 4px 0 0 var(--teal); color:#F8FAFC; }
+  .ex-file .cm{ color:#7C8DA6; }
+  .ex-rows{ display:flex; flex-direction:column; gap:12px; }
+  .ex-row{ display:grid; grid-template-columns:120px 1fr 1.7fr; gap:12px; align-items:stretch; }
+  .ex-stack{ align-self:center; justify-self:start; font-family:var(--mono); font-size:18px; font-weight:700; color:var(--navy);
+             background:var(--teal-light); border-radius:8px; padding:4px 10px; }
+  .ex-before, .ex-after{ border-radius:12px; padding:12px 16px; font-size:21px; line-height:1.4; }
+  .ex-before{ background:rgba(239,68,68,.14); color:#FECACA; }
+  .ex-after{ background:rgba(20,184,166,.16); color:#E2E8F0; }
+  .ex-before code, .ex-after code{ color:var(--teal-light); }
+  .ex-prompt{ display:flex; align-items:center; gap:14px; background:#16213A; border:1px solid #23314F; border-radius:14px;
+              padding:12px 18px; font-size:22px; }
+  .ex-say{ flex:0 0 auto; background:var(--gold); color:var(--navy); font-size:16px; font-weight:700; padding:3px 12px; border-radius:999px; }
+  .ex-note{ font-size:23px; color:#E2E8F0; line-height:1.4; }
+  .ex-note code{ color:var(--teal-light); }
+  .ex-ours{ display:flex; align-items:center; gap:14px; font-size:21px; color:var(--gold); font-weight:600; }
+  .ex-ours .ours{ flex:0 0 auto; background:var(--teal); color:var(--navy); font-size:17px; padding:4px 13px; border-radius:999px; font-weight:700; }
+  .ex-vscode{ font-size:18px; color:#94A3B8; }
+  .ex-vscode code{ color:#CBD5E1; }
+
   /* modes: no motion for screenshots and printing; a bare preview inside the presenter window */
+  .static .ex-panel{ transition:none !important; transform:none !important; }
   .static .slide, .static .reveal, .static .hero-line span{ transition:none !important; }
   .static .reveal{ opacity:1 !important; transform:none !important; }
   .static .hero-line span{ transform:none !important; }
@@ -479,6 +533,12 @@
   .p-top .steps{ font-size:15px; color:#94A3B8; }
   .p-top .steps.more{ color:#F59E0B; font-weight:700; }
   .p-keys{ margin-top:auto; font-size:13px; color:#64748B; line-height:1.5; }
+  .p-ex{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px; }
+  .p-tag.ex{ background:#14B8A6; }
+  .p-tag.ex.live{ background:#5EEAD4; }
+  .p-notes .more{ border-top:1px dashed #334155; margin-top:6px; padding-top:12px; color:#94A3B8; font-size:19px; }
+  .p-notes .more-h{ font-size:14px; font-weight:700; color:#64748B; margin-bottom:8px; }
+  .p-top button.on{ background:#14B8A6; color:#0B1220; }
   .p-next-title{ color:#CBD5E1; }
 
   /* printing: every slide on its own page, everything shown */
@@ -491,7 +551,7 @@
     .reveal, [data-step]{ opacity:1 !important; transform:none !important; }
     .bug{ opacity:1 !important; }
     .hero-line span{ transform:none !important; }
-    #dots, #progress-track, #ui, #blank{ display:none; }
+    #dots, #progress-track, #ui, #blank, .ex-btn, .ex-panel{ display:none !important; }
     *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   }
 
@@ -526,7 +586,7 @@
   <p class="lead reveal" data-d="2">בחצי שעה אי אפשר לכסות את כל הנושא, ולכן ההרצאה מתמקדת ברעיון אחד.</p>
   <div class="twocol essence">
     <div class="card tint big reveal" data-d="3"><div class="card-label">הרעיון המרכזי</div><p>הטעויות היקרות שראינו לא היו המצאות. העובדות היו נכונות, והמסקנה הייתה שגויה.</p><p>לכן ההרצאה עוסקת בדבר אחד: איך עובדים עם עוזר קוד כך שהטעויות האלה נתפסות בזמן.</p></div>
-    <div class="card quiet reveal" data-d="4"><div class="card-label">נושאים להרצאות אחרות</div><ul><li>איך מודל שפה מאומן ומה קורה בתוכו</li><li>השוואה בין כלים ובחירת מודל</li><li>כתיבת skills, hooks וסוכנים משלכם, וחיבור מערכות חיצוניות</li><li>אבטחה, פרטיות ומדיניות שימוש בנתונים</li><li>איך צוות סוקר קוד שכתב AI</li></ul></div>
+    <div class="card quiet reveal" data-d="4"><div class="card-label">נושאים להרצאות אחרות</div><ul><li>איך מודל שפה מאומן ומה קורה בתוכו</li><li>השוואה בין כלים ובחירת מודל</li><li>כתיבת skills, hooks וסוכנים לעומק, וחיבור מערכות חיצוניות</li><li>אבטחה, פרטיות ומדיניות שימוש בנתונים</li><li>איך צוות סוקר קוד שכתב AI</li></ul></div>
   </div>
   <div class="callout reveal" data-d="5"><span>בסוף ההרצאה תקבלו חמישה הרגלים שאפשר ליישם כבר מחר.</span></div>
   <div class="pagenum">03</div>
@@ -629,6 +689,18 @@
 </div>
   <div class="explain reveal" data-d="6"><p>שני כלי הטרמינל של הסוכן חולקים תיקיית עבודה אחת. cd באחד מהם העביר גם את השני, והבדיקות רצו בעותק אחר.</p><p>גילינו את זה כי ידענו כמה לצפות: הרצה שהייתה אמורה למצוא 6 בדיקות מצאה רק אחת.</p></div>
   <div class="callout reveal" data-d="7"><span>ההנחה שאף אחד לא בדק: שהבדיקות רצות על הקוד של המשימה.</span></div>
+  <button class="ex-btn" type="button" data-ex="worktree" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel two" data-ex-panel="worktree" role="dialog" aria-hidden="true" aria-label="הרבה עותקים של אותו מאגר, וכלל אחד שמונע את הטעות">
+    <div class="ex-head"><h3>הרבה עותקים של אותו מאגר, וכלל אחד שמונע את הטעות</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>שלושה מתוך 110 העותקים שאצלי</span><span class="ex-path"><code>git worktree list</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">C:/Dev/work/BN-1549/bd-ms   debf5fcf4 [bugfix/BN-2394/meeting-search-stale-results]</span><span class="ln">C:/Dev/work/BN-156/bd-ms    322edd675 [feature/BN-156/committee-settings-log-text]</span><span class="ln">C:/Dev/work/BN-167/bd-ms    b61fe3df8 [feature/BN-167/help-center-activity-log]</span></code></pre></div>
+    <div class="ex-file"><div class="ex-tab"><span>ככה נראית הרצה לפי הכלל</span><span class="ex-path"><code>PowerShell</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln hot">Set-Location C:\Dev\work\BN-167\bd-ms</span><span class="ln hot">if ((Get-Location).Path -ne 'C:\Dev\work\BN-167\bd-ms') { throw 'wrong tree' }</span><span class="ln">dotnet test</span></code></pre></div></div>
+    <p class="ex-note">כל העותקים נראים אותו דבר מבפנים, ולכן הכלל אצלנו: כל הרצה של בדיקות מתחילה בנתיב מלא, ונעצרת אם היא לא במקום הנכון.</p>
+    
+    
+  </div>
   <div class="pagenum">10</div>
 </section>
 <section class="slide" data-n="11" aria-label="שלושה סוגים של טעות">
@@ -637,6 +709,16 @@
   <div class="types big"><div class="type reveal" data-d="2"><i style="background:var(--teal)"></i><h4>עובדה שגויה</h4><p>הזיה, ולרוב קל לתפוס אותה</p></div><div class="type reveal" data-d="3"><i style="background:var(--gold)"></i><h4>עובדה נכונה, לשאלה אחרת</h4><p>כמו כאן, וקשה לתפוס</p></div><div class="type hot reveal" data-d="4"><i style="background:var(--red)"></i><h4>עובדה נכונה, ומסקנה רחבה מדי</h4><p>היקרה ביותר, כי הכל נראה בסדר</p></div></div>
   <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>שער (gate)</b><span class="m">נקודה קבועה שבה עוצרים, וממשיכים רק כשיש ראיה</span></div>
   <div class="callout reveal" data-d="5"><span>הטעויות היקרות שראינו היו במסקנות מעובדות נכונות.</span></div>
+  <button class="ex-btn" type="button" data-ex="claim-checker" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel" data-ex-panel="claim-checker" role="dialog" aria-hidden="true" aria-label="לסוג השלישי יש אצלנו סוכן משלו">
+    <div class="ex-head"><h3>לסוג השלישי יש אצלנו סוכן משלו</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>מהפלייבוק שלנו, מקוצר</span><span class="ex-path"><code>.claude/agents/claim-checker.md</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">---</span><span class="ln">name: claim-checker</span><span class="ln">description: Verify ONE claim against its source before it is published [...]</span><span class="ln">tools: Read, Grep, Glob, Bash</span><span class="ln">model: inherit</span><span class="ln">---</span><span class="ln"> </span><span class="ln"># Claim checker</span><span class="ln"> </span><span class="ln">You verify one claim. You do not improve it, extend it, or answer the question behind it.</span><span class="ln"> </span><span class="ln hot">**The failure you exist to catch is not a wrong fact. It is a true fact carrying a claim wider</span><span class="ln hot">than itself.** [...]</span></code></pre></div></div>
+    <p class="ex-note">מקבל טענה אחת, במילים שבהן היא עומדת להתפרסם, ומחזיר אחת משלוש: מאומתת, מופרכת, או שאי אפשר להכריע.</p>
+    
+    
+  </div>
   <div class="pagenum">11</div>
 </section>
 <section class="slide dark" data-n="12" aria-label="חלק 2: שיטות העבודה">
@@ -660,6 +742,16 @@
   <p class="kicker reveal" data-d="1">שיטה 1 מתוך 5</p><h2 class="title-lg reveal" data-d="1">לתת לסוכן דרך לבדוק את עצמו</h2><p class="lead reveal" data-d="2">בדיקה שהסוכן מריץ בעצמו היא ההבדל בין סשן שצריך להשגיח עליו לבין סשן שאפשר לעזוב.</p><p class="gate reveal" data-d="3"><span class="tag">שער</span><span>לפני שאומרים "סיימתי": בדיקה שרצה, עם פלט שראיתם</span></p>
     <div class="twocol"><div class="card  reveal" data-d="4"><div class="card-label">למה</div><p>הסוכן עוצר כשהעבודה <b>נראית</b> גמורה.</p><p>בלי בדיקה, אתם צריכים לבדוק במקומו.</p><p>עם בדיקה, הוא מתקן לבד, בלי לגעת בבדיקה.</p></div><div class="card tint reveal" data-d="5"><div class="card-label">איך עושים</div><ul><li>בדיקה שמחזירה עבר או נכשל: טסטים, build או צילום מסך</li><li>לבקש לראות את הפלט של הבדיקה</li><li>"תריץ את הטסטים ותראה לי את הפלט"</li></ul></div></div>
     <div class="callout reveal" data-d="6"><span class="ours">אצלנו</span><span>אומרים "סיימתי" רק אחרי בדיקה שיכלה להיכשל, ולא נכשלה.</span></div>
+  <button class="ex-btn" type="button" data-ex="checks" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel" data-ex-panel="checks" role="dialog" aria-hidden="true" aria-label="בדיקה שהסוכן יכול להריץ: פעם אחת, ובלי מצב צפייה">
+    <div class="ex-head"><h3>בדיקה שהסוכן יכול להריץ: פעם אחת, ובלי מצב צפייה</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>לכל סביבה, הפקודה שרצה פעם אחת ומחזירה עבר או נכשל</span><span class="ex-path"><code>terminal</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">dotnet test<span class="cm">                        # .NET</span></span><span class="ln hot">npx vitest run<span class="cm">                     # Vitest: one run, not watch mode</span></span><span class="ln hot">ng test --watch=false<span class="cm">              # Angular</span></span><span class="ln">npx jest<span class="cm">                           # Jest runs once unless --watch is added</span></span><span class="ln">npx tsc --noEmit &amp;&amp; npm run lint<span class="cm">   # types and lint</span></span></code></pre></div><div class="ex-prompt"><span class="ex-say">הבקשה</span><span>תריץ את הבדיקות ותראה לי את הפלט: כמה רצו, ואיפה.</span></div></div>
+    <p class="ex-note">בלי מצב צפייה, כי שם הבדיקה לא נגמרת אף פעם, והסוכן נשאר לחכות לה.</p>
+    
+    
+  </div>
   <div class="pagenum">13</div>
 </section>
 <section class="slide" data-n="14" aria-label="שיטה 2: תכנון">
@@ -667,6 +759,18 @@
   <p class="kicker reveal" data-d="1">שיטה 2 מתוך 5</p><h2 class="title-lg reveal" data-d="1">קודם לחקור ולתכנן, ורק אחר כך לכתוב קוד</h2><p class="lead reveal" data-d="2">סוכן שקופץ ישר לקוד עלול לפתור היטב את הבעיה הלא נכונה.</p><div class="term reveal" data-d="2"><span class="tag">מושג</span><b>plan mode</b><span class="m">מצב שבו הסוכן רק קורא ומתכנן, בלי לשנות אף קובץ</span></div><p class="gate reveal" data-d="3"><span class="tag">שער</span><span>לפני שכותבים קוד: תוכנית שקראתם ואישרתם</span></p>
     <div class="twocol"><div class="card  reveal" data-d="4"><div class="card-label">ארבעה שלבים</div><ul><li><b>לחקור</b> בלי לשנות כלום</li><li><b>לתכנן</b> ולקרוא את התוכנית</li><li><b>לממש</b> עם בדיקות</li><li><b>לסגור</b> עם commit ופתיחת PR</li></ul></div><div class="card tint reveal" data-d="5"><div class="card-label">מתי לדלג</div><p>שינוי שאפשר לתאר במשפט אחד, פשוט עושים.</p><p>תכנון שווה את הזמן כשלא ברור איך, כשנוגעים בכמה קבצים, או כשלא מכירים את הקוד.</p></div></div>
     <div class="callout reveal" data-d="6"><span class="ours">אצלנו</span><span>לפני שנוצר ענף, <code>/start-task</code> שואל אם בכלל להתחיל.</span></div>
+  <button class="ex-btn" type="button" data-ex="plan" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel two" data-ex-panel="plan" role="dialog" aria-hidden="true" aria-label="מצב תכנון: איך נכנסים, ומה מבקשים ממנו">
+    <div class="ex-head"><h3>מצב תכנון: איך נכנסים, ומה מבקשים ממנו</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>ב־Claude Code</span><span class="ex-path"><code>keys and commands</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln hot">Shift+Tab                       until the mode line shows plan mode</span><span class="ln">/plan                           the same, typed</span><span class="ln">claude --permission-mode plan   a session that starts in it</span><span class="ln">Ctrl+G                          open the plan in your editor</span></code></pre></div>
+    <div class="ex-file"><div class="ex-tab"><span>בקשה לתוכנית</span><span class="ex-path"><code>prompt</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">/plan Add paging to GET /api/orders.</span><span class="ln">Keep today's behaviour when no page is sent.</span><span class="ln">Tests: a bad page size, an empty result, an old client.</span><span class="ln hot">List the decisions I have to make before you write code.</span></code></pre></div></div>
+    
+    
+    <p class="ex-vscode">ב־VS Code בוחרים את Plan ברשימת הסוכנים, או מקלידים <code>/plan</code>.</p>
+  </div>
   <div class="pagenum">14</div>
 </section>
 <section class="slide" data-n="15" aria-label="שיטה 3: ספציפיות">
@@ -678,6 +782,17 @@
     <div class="cmp-row reveal" data-d="4"><div class="cmp bad">"תתקן את הבאג בהתחברות"</div><div class="chev-wrap"><i class="chev"></i></div><div class="cmp good">"ההתחברות נכשלת אחרי שפג תוקף הסשן. תשחזר בטסט, ואז תתקן."</div></div><div class="cmp-row reveal" data-d="5"><div class="cmp bad">"תוסיף טסטים לקובץ הזה"</div><div class="chev-wrap"><i class="chev"></i></div><div class="cmp good">"תכתוב טסט למקרה שבו המשתמש לא מחובר, בלי mocks"</div></div><div class="cmp-row reveal" data-d="6"><div class="cmp bad">"תוסיף ווידג'ט של לוח שנה"</div><div class="chev-wrap"><i class="chev"></i></div><div class="cmp good">"תבנה אותו לפי הדפוס של הווידג'טים הקיימים."</div></div>
   </div>
   <div class="callout reveal" data-d="7"><span class="ours">אצלנו</span><span>בודקים טענות מול המסמך המקורי, כמו מסמך הדרישות או הכרטיס, ולא מול סיכום שלו.</span></div>
+  <button class="ex-btn" type="button" data-ex="prompts" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel" data-ex-panel="prompts" role="dialog" aria-hidden="true" aria-label="אותו רעיון, בבקשות מהעולם שלכם">
+    <div class="ex-head"><h3>אותו רעיון, בבקשות מהעולם שלכם</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body"><div class="ex-rows">
+    <div class="ex-row"><span class="ex-stack" dir="ltr">.NET</span><div class="ex-before">תתקן את הבאג בהזמנות</div><div class="ex-after"><code>GET /api/orders</code> מחזיר 500 כשללקוח אין הזמנות. תכתוב קודם טסט xUnit שנכשל, ורק אז תתקן.</div></div>
+    <div class="ex-row"><span class="ex-stack" dir="ltr">React</span><div class="ex-before">התאריך מוצג לא נכון</div><div class="ex-after">ב־<code>OrderDate</code> התאריך יוצא יום אחורה למשתמשים ב־<code>UTC-5</code>. תשחזר בטסט Vitest עם אזור זמן קבוע, ואז תתקן את <code>formatDate</code>.</div></div>
+    <div class="ex-row"><span class="ex-stack" dir="ltr">Angular</span><div class="ex-before">תוסיף ולידציה לטופס</div><div class="ex-after">בטופס ההרשמה, שדה הטלפון מקבל אותיות. תוסיף ולידטור לפי הדפוס של <code>EmailValidator</code> הקיים, עם טסט לשני המקרים.</div></div></div></div>
+    <p class="ex-note">בכל בקשה טובה יש שלושה דברים: מה קורה, איפה, ואיך נדע שזה תוקן.</p>
+    
+    
+  </div>
   <div class="pagenum">15</div>
 </section>
 <section class="slide" data-n="16" aria-label="שיטה 4: ניהול ההקשר">
@@ -687,6 +802,16 @@
   <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>סוכן משנה (subagent)</b><span class="m">סוכן נפרד עם חלון הקשר משלו: מקבל משימה, ומחזיר רק את המסקנה</span></div>
   <div class="grid4"><div class="ncard reveal" data-d="3"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><div><h4>לכל משימה סשן נקי</h4><p>לא לערבב משימות. ביניהן צ'אט חדש.</p></div></div><div class="ncard reveal" data-d="4"><span class="badge " style="background:var(--teal);color:var(--navy)">2</span><div><h4>שני תיקונים לא עזרו?</h4><p>פותחים סשן נקי, עם בקשה טובה יותר.</p></div></div><div class="ncard reveal" data-d="5"><span class="badge " style="background:var(--teal);color:var(--navy)">3</span><div><h4>חקירה כבדה עוברת לסוכן משנה</h4><p>הוא קורא בהקשר נפרד, ומחזיר רק סיכום.</p></div></div><div class="ncard reveal" data-d="6"><span class="badge " style="background:var(--teal);color:var(--navy)">4</span><div><h4>קובץ הנחיות קצר</h4><p>שורה שלא מונעת טעות נמחקת. עד 200 שורות.</p><p class="stat">קובץ צד השרת: <b data-count="316" data-from="505">316</b> שורות במקום 505</p></div></div></div>
   <div class="callout reveal" data-d="7"><span class="ours">אצלנו</span><span>כללים נטענים תמיד, נהלים רק כשצריך, וקריאה כבדה עוברת לסוכני משנה.</span></div>
+  <button class="ex-btn" type="button" data-ex="subagent" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel" data-ex-panel="subagent" role="dialog" aria-hidden="true" aria-label="סוכן משנה הוא קובץ אחד">
+    <div class="ex-head"><h3>סוכן משנה הוא קובץ אחד</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>מהפלייבוק שלנו, מקוצר</span><span class="ex-path"><code>.claude/agents/test-runner.md</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">---</span><span class="ln hot">name: test-runner</span><span class="ln hot">description: Run the bd-ms or bd-client test suite and report a trustworthy total [...]</span><span class="ln hot">tools: Bash, PowerShell, Read, Grep</span><span class="ln">model: sonnet</span><span class="ln">---</span><span class="ln"> </span><span class="ln"># Test runner</span><span class="ln"> </span><span class="ln">You produce one number that somebody will quote. [...]</span><span class="ln"> </span><span class="ln">🔴 **Assert the working directory absolutely.** The Bash and PowerShell tools share ONE working</span><span class="ln">directory, and a `cd` in either silently redirects the other. [...] It happened:</span><span class="ln hot">`Passed! Failed: 0, Passed: 1142` against a tree whose real total was 1194, and the 52 missing</span><span class="ln hot">tests were the new ones. Nothing in the output named the tree.</span></code></pre></div></div>
+    <p class="ex-note">למעלה: שם, מתי להשתמש בו, ואילו כלים מותר לו. למטה: ההוראות, והשורות הראשונות שלהן הן המקרה שפתחנו בו.</p>
+    
+    <p class="ex-vscode">ב־VS Code אותו קובץ עובד מתוך <code>.claude/agents</code>, וגם כקובץ <code>.agent.md</code> בתוך <code>.github/agents</code>.</p>
+  </div>
   <div class="pagenum">16</div>
 </section>
 <section class="slide" data-n="17" aria-label="שיטה 5: כל טעות לכלל">
@@ -695,6 +820,18 @@
     <div class="twocol"><div class="card  reveal" data-d="3"><div class="card-label">מאיפה זה בא</div><p class="src"><b>Mitchell Hashimoto</b> כתב בפברואר 2026</p><p>על כל טעות בונים כלל או בדיקה, כדי שלא תחזור.</p>
         <p class="src"><b>OpenAI</b> פרסמו בפברואר 2026</p><p>המהנדסים לא כתבו קוד. הם בנו את הסביבה.</p></div><div class="card tint reveal" data-d="4"><div class="card-label">איך עושים</div><ul><li>טעות שחזרה פעמיים הופכת לכלל קצר</li><li>כלל שהסוכן מפספס נהיה hook או בדיקה</li><li>כלל שלא עוזר נמחק</li></ul></div></div>
     <div class="callout reveal" data-d="5"><span class="ours">אצלנו</span><span>לקח שכדאי לכולם עובר לפלייבוק, ומשם לסוכן של כל מפתח בצוות.</span></div>
+  <button class="ex-btn" type="button" data-ex="hook" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel two" data-ex-panel="hook" role="dialog" aria-hidden="true" aria-label="כך נראה hook שחוסם עריכה של תיקיית Migrations">
+    <div class="ex-head"><h3>כך נראה hook שחוסם עריכה של תיקיית <code>Migrations</code></h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>רושמים אותו</span><span class="ex-path"><code>.claude/settings.json</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">"PreToolUse": [{</span><span class="ln hot">  "matcher": "Edit|Write",</span><span class="ln">  "hooks": [{ "type": "command",</span><span class="ln">              "command": "node .claude/hooks/no-migrations.js" }]</span><span class="ln">}]</span></code></pre></div>
+    <div class="ex-file"><div class="ex-tab"><span>והבדיקה עצמה, בכל שפה</span><span class="ex-path"><code>.claude/hooks/no-migrations.js</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">const hook = JSON.parse(require("fs").readFileSync(0, "utf8"));</span><span class="ln">const file = hook.tool_input.file_path ?? "";</span><span class="ln"> </span><span class="ln hot">if (/[\\/]Migrations[\\/]/.test(file)) {</span><span class="ln hot">  console.error("Generated folder. Use: dotnet ef migrations add");</span><span class="ln hot">  process.exit(2);<span class="cm">   // 2 = blocked, and the agent gets the message</span></span><span class="ln">}</span></code></pre></div></div>
+    <p class="ex-note">הסוכן מנסה לערוך קובץ ב־<code>Migrations</code>? הסקריפט מחזיר 2 והעריכה נחסמת, וההודעה אומרת לו מה לעשות במקום.</p>
+    <p class="ex-ours"><span class="ours">אצלנו</span><span>אותו מנגנון חוסם אצלנו עריכה של קבצי הנחיות שנוצרים אוטומטית, ומפנה לקובץ המקור.</span></p>
+    <p class="ex-vscode">ב־VS Code ה־hooks עדיין בתצוגה מקדימה, בקובץ בתוך <code>.github/hooks</code>, עם אותם אירועים, ו־2 חוסם גם שם.</p>
+  </div>
   <div class="pagenum">17</div>
 </section>
 <section class="slide dark" data-n="18" aria-label="חלק 3: איך אנחנו עובדים">
@@ -756,6 +893,16 @@
       <div class="chips"><code class="chip wide">python C:/Dev/engineering-playbook/AI/tooling/playbook_sync.py doctor</code></div></div></div>
   </div>
   <div class="callout reveal" data-d="5"><span class="ours you">אצלכם</span><span>כשקובץ ההנחיות בתוך המאגר, מספיק לשכפל אותו.</span></div>
+  <button class="ex-btn" type="button" data-ex="doctor" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel" data-ex-panel="doctor" role="dialog" aria-hidden="true" aria-label="ככה נראית הבדיקה של ההתקנה">
+    <div class="ex-head"><h3>ככה נראית הבדיקה של ההתקנה</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>הפלט האמיתי, מקוצר</span><span class="ex-path"><code>playbook_sync.py doctor</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">playbook doctor</span><span class="ln">  OK    playbook         @4a10623</span><span class="ln">  OK    hooks (user)     all 4 installed: PostToolUse, PreToolUse, SessionEnd, SessionStart</span><span class="ln">  OK    kill switch      off (hooks active)</span><span class="ln">  [...]</span><span class="ln hot">  last seen firing — the hooks record this themselves, so it is measured, not</span><span class="ln hot">  a guess about where a message renders in any particular client:</span><span class="ln">     SessionStart   2026-10-07 07:52:12  C:/Dev  [...]</span><span class="ln hot">     PreToolUse     2026-10-05 10:36:12  denied an edit to a generated copy</span><span class="ln">  [...]</span><span class="ln">  11 ok, 1 warning(s), 0 failure(s)</span></code></pre></div></div>
+    <p class="ex-note">החלק האחרון נמדד, לא מנוחש: כל hook רושם בעצמו מתי רץ בפעם האחרונה, וכך רואים שהוא באמת עובד.</p>
+    
+    
+  </div>
   <div class="pagenum">20</div>
 </section>
 <section class="slide dark film" data-n="21" aria-label="מהכרטיס ועד המיזוג">
@@ -805,6 +952,16 @@
       <p class="why"><small>למה</small>118 לקחים פרטיים,<br>אפס בפלייבוק</p>
     </div></div>
   <div class="callout" data-step="6"><span class="ours you">אצלכם</span><span>ליד כל כלל, כתבו את הטעות שהוא מונע.</span></div>
+  <button class="ex-btn" type="button" data-ex="skill" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel" data-ex-panel="skill" role="dialog" aria-hidden="true" aria-label="נוהל כתוב, ושער כבר בצעד הראשון שלו">
+    <div class="ex-head"><h3>נוהל כתוב, ושער כבר בצעד הראשון שלו</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>מהפלייבוק שלנו, מקוצר</span><span class="ex-path"><code>.claude/skills/start-task/SKILL.md</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">---</span><span class="ln">name: start-task</span><span class="ln">description: Start work on a Jira BN ticket - read the Story, open its sub-task, [...]</span><span class="ln">---</span><span class="ln">[...]</span><span class="ln hot">## 0. Should this be started at all — the gate, and it must be able to fail</span><span class="ln">[...]</span><span class="ln">**Read the issue first (step 1 below), then answer these five from what it says.** State each</span><span class="ln">answer in one line before creating anything. Any of them can stop you.</span><span class="ln"> </span><span class="ln hot">| **1** | **Is it ours to build?** | [...]</span><span class="ln hot">| **2** | **Is it a decision, not an implementation?** | [...]</span><span class="ln hot">| **3** | **Is it blocked?** | [...]</span><span class="ln hot">| **4** | **Is there enough to act on?** | [...]</span><span class="ln hot">| **5** | **Is it already finished?** | [...]</span></code></pre></div></div>
+    <p class="ex-note">השם והתיאור תמיד זמינים לסוכן, וכך הוא יודע מתי לקרוא לנוהל. השאר נטען רק כשמפעילים אותו.</p>
+    
+    <p class="ex-vscode">ב־VS Code אותו <code>SKILL.md</code> עובד, מתוך <code>.claude/skills</code>, <code>.github/skills</code> או <code>.agents/skills</code>.</p>
+  </div>
   <div class="pagenum">22</div>
 </section>
 <section class="slide" data-n="23" aria-label="מה נשאר אצלכם">
@@ -819,6 +976,16 @@
       <p class="meant">התכוונו: <code>/start-task</code></p><p class="red"><b>רק מי שהסתכל ראה.</b></p></div>
   </div>
   <div class="callout reveal" data-d="7"><span><b>הסוכן עובד מהר, אבל האחריות על מה שיוצא היא שלכם.</b></span></div>
+  <button class="ex-btn" type="button" data-ex="permissions" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel" data-ex-panel="permissions" role="dialog" aria-hidden="true" aria-label="הרשאות: מה מותר, על מה שואלים, ומה אסור">
+    <div class="ex-head"><h3>הרשאות: מה מותר, על מה שואלים, ומה אסור</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>בהגדרות של הפרויקט</span><span class="ex-path"><code>.claude/settings.json</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">"permissions": {</span><span class="ln">  "allow": ["Bash(dotnet test *)", "Bash(npm run *)"],</span><span class="ln hot">  "ask":   ["Bash(git push *)"],</span><span class="ln hot">  "deny":  ["Read(./.env)", "Read(./secrets/**)"]</span><span class="ln">}</span></code></pre></div></div>
+    <p class="ex-note">הסדר קבוע: קודם בודקים מה אסור, אחר כך על מה שואלים, ורק בסוף מה מותר. כלל שאוסר תמיד גובר.</p>
+    
+    <p class="ex-vscode">ב־VS Code ההגדרה היא <code>chat.tools.terminal.autoApprove</code>, ושם <code>false</code> רק שואל ולא חוסם. כדי לחסום צריך hook.</p>
+  </div>
   <div class="pagenum">23</div>
 </section>
 <section class="slide dark" data-n="24" aria-label="חמישה הרגלים למחר">
@@ -836,9 +1003,30 @@
     <div class="srow reveal" data-d="3"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><div><h3>טעות שחזרה פעמיים הופכת לשורה בקובץ</h3><p>באותו יום, דרך המאגר, כדי שתגיע לכל הצוות. למשל, אחרי המקרה שראינו:</p>
       <p class="quote">בדיווח על בדיקות כותבים איפה הן רצו, וכמה רצו לעומת לפני השינוי.</p></div></div>
     <div class="srow reveal" data-d="4"><span class="badge " style="background:var(--purple);color:#fff">3</span><div><h3>שערים אוטומטיים: מה שחייב לקרות, רץ לבד</h3><p>בדיקה שרצה בכל פעם, בלי שמישהו צריך לזכור:</p>
-      <div class="chips three"><code class="chip">pre-commit</code><code class="chip">CI</code><code class="chip">hooks</code></div></div></div>
+      <div class="chips three"><code class="chip ex-chip" data-ex="gates" role="button" tabindex="0">pre-commit</code><code class="chip ex-chip" data-ex="gates" role="button" tabindex="0">CI</code><code class="chip ex-chip" data-ex="gates" role="button" tabindex="0">hooks</code></div></div></div>
   </div>
   <div class="ask reveal" data-d="5">השבוע, הוסיפו את השורה מהדוגמה לקובץ ההנחיות שלכם.</div>
+  <button class="ex-btn" type="button" data-ex="agents-md" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel" data-ex-panel="agents-md" role="dialog" aria-hidden="true" aria-label="קובץ הנחיות ביום הראשון">
+    <div class="ex-head"><h3>קובץ הנחיות ביום הראשון</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>דוגמה למאגר עם צד שרת וצד לקוח</span><span class="ex-path"><code>AGENTS.md</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln"># AGENTS.md</span><span class="ln"> </span><span class="ln">## Build and test</span><span class="ln">- Build: `dotnet build`</span><span class="ln">- Tests: `dotnet test` from the repository root, all of them, once</span><span class="ln">- Front end: `npm run lint`, then `npx vitest run` (never watch mode)</span><span class="ln"> </span><span class="ln">## Don't</span><span class="ln">- Don't edit `Migrations/` by hand: run `dotnet ef migrations add &lt;Name&gt;`</span><span class="ln">- Don't `git add -A`: add files by name</span><span class="ln"> </span><span class="ln">## When you report test results</span><span class="ln hot">- Say where they ran, and how many ran before and after the change</span></code></pre></div></div>
+    <p class="ex-note">השורה האחרונה היא המקרה שפתחנו בו. ואם אין עדיין קובץ בכלל, הפקודה <code>/init</code> ב־Claude Code כותבת טיוטה ראשונה מתוך המאגר, ומשם מקצרים.</p>
+    
+    <p class="ex-vscode">ב־VS Code הקובץ <code>AGENTS.md</code> נקרא כברירת מחדל, ו־Claude Code קורא אותו כשאין לידו <code>CLAUDE.md</code>.</p>
+  </div>
+  <div class="ex-panel two" data-ex-panel="gates" data-via="chip" role="dialog" aria-hidden="true" aria-label="שערים אוטומטיים: בדיקות שרצות בלי שמישהו יזכור">
+    <div class="ex-head"><h3>שערים אוטומטיים: בדיקות שרצות בלי שמישהו יזכור</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>לפני כל commit</span><span class="ex-path"><code>.husky/pre-commit</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">npx lint-staged<span class="cm">                     # lint only the staged files</span></span><span class="ln">dotnet format --verify-no-changes<span class="cm">   # fails when C# is not formatted</span></span></code></pre></div>
+    <div class="ex-file"><div class="ex-tab"><span>מקוצר, מה־CI שלנו שרץ על כל PR</span><span class="ex-path"><code>azure-pipelines-ci.yml</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln hot">pr:</span><span class="ln">  branches:</span><span class="ln">    include:</span><span class="ln">      - release/*</span><span class="ln">steps:</span><span class="ln">  - script: dotnet restore BDMS.sln</span><span class="ln hot">  - script: bash tools/ci/run-all-tests.sh</span></code></pre></div></div>
+    <p class="ex-note">השער השלישי הוא ה־hook מהשיטה החמישית: הוא רץ בתוך הסוכן, עוד לפני שהעריכה קורית.</p>
+    
+    
+  </div>
   <div class="pagenum">25</div>
 </section>
 <section class="slide dark" data-n="26" aria-label="שאלות">
@@ -887,7 +1075,7 @@
 <div id="laser"></div>
 <div id="presenter"></div>
 <pre id="check-out" hidden></pre>
-<script type="application/json" id="notes">[{"n":1,"title":"פתיחה: הייתם ממזגים?","start":0,"sec":23.5,"cut":false,"appendix":false,"script":[]},{"n":2,"title":"פתיחה","start":23.5,"sec":34,"cut":false,"appendix":false,"script":[]},{"n":3,"title":"מה בהרצאה הזו, ומה בהרצאות אחרות","start":57.5,"sec":52.5,"cut":false,"appendix":false,"script":[]},{"n":4,"title":"המפה והמטרות","start":110,"sec":47.5,"cut":false,"appendix":false,"script":[]},{"n":5,"title":"חלק 1: היסודות","start":157.5,"sec":19,"cut":false,"appendix":false,"script":[]},{"n":6,"title":"מודל שפה","start":176.5,"sec":70,"cut":false,"appendix":false,"script":[]},{"n":7,"title":"חלון ההקשר","start":246.5,"sec":65.5,"cut":false,"appendix":false,"script":[]},{"n":8,"title":"סוכן","start":312,"sec":73.5,"cut":false,"appendix":false,"script":[]},{"n":9,"title":"המקרה: אתם הייתם ממזגים?","start":385.5,"sec":30,"cut":false,"appendix":false,"script":[]},{"n":10,"title":"התשובה: העותק הלא נכון","start":415.5,"sec":110,"cut":false,"appendix":false,"script":[]},{"n":11,"title":"שלושה סוגים של טעות","start":525.5,"sec":60.5,"cut":false,"appendix":false,"script":[]},{"n":12,"title":"חלק 2: שיטות העבודה","start":586,"sec":25.5,"cut":false,"appendix":false,"script":[]},{"n":13,"title":"שיטה 1: בדיקה","start":611.5,"sec":88,"cut":false,"appendix":false,"script":[]},{"n":14,"title":"שיטה 2: תכנון","start":699.5,"sec":93.5,"cut":false,"appendix":false,"script":[]},{"n":15,"title":"שיטה 3: ספציפיות","start":793,"sec":57.5,"cut":false,"appendix":false,"script":[]},{"n":16,"title":"שיטה 4: ניהול ההקשר","start":850.5,"sec":118,"cut":false,"appendix":false,"script":[]},{"n":17,"title":"שיטה 5: כל טעות לכלל","start":968.5,"sec":84,"cut":false,"appendix":false,"script":[]},{"n":18,"title":"חלק 3: איך אנחנו עובדים","start":1052.5,"sec":23,"cut":false,"appendix":false,"script":[]},{"n":19,"title":"הפלייבוק","start":1075.5,"sec":56.5,"cut":false,"appendix":false,"script":[]},{"n":20,"title":"מפתח חדש אצלנו","start":1132,"sec":47,"cut":false,"appendix":false,"script":[]},{"n":21,"title":"מהכרטיס ועד המיזוג","start":1179,"sec":177.1,"cut":false,"appendix":false,"script":[]},{"n":22,"title":"יום עבודה אצלנו","start":1356.1,"sec":43.5,"cut":false,"appendix":false,"script":[]},{"n":23,"title":"מה נשאר אצלכם","start":1399.6,"sec":69.5,"cut":false,"appendix":false,"script":[]},{"n":24,"title":"חמישה הרגלים למחר","start":1469.1,"sec":66,"cut":false,"appendix":false,"script":[]},{"n":25,"title":"איך מתחילים","start":1535.1,"sec":76,"cut":false,"appendix":false,"script":[]},{"n":26,"title":"שאלות","start":1611.1,"sec":14.5,"cut":false,"appendix":false,"script":[]},{"n":27,"title":"נספח: כללים קשיחים","start":1625.6,"sec":0,"cut":false,"appendix":true,"script":[]},{"n":28,"title":"נספח: חמש טעויות נפוצות","start":1625.6,"sec":0,"cut":false,"appendix":true,"script":[]},{"n":29,"title":"נספח: מילון מושגים","start":1625.6,"sec":0,"cut":false,"appendix":true,"script":[]},{"n":30,"title":"נספח: שאלות נפוצות","start":1625.6,"sec":0,"cut":false,"appendix":true,"script":[]}]</script>
+<script type="application/json" id="notes">[{"n":1,"title":"פתיחה: הייתם ממזגים?","start":0,"sec":24.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":2,"title":"פתיחה","start":24.5,"sec":31.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":3,"title":"מה בהרצאה הזו, ומה בהרצאות אחרות","start":56,"sec":51,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":4,"title":"המפה והמטרות","start":107,"sec":38.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":5,"title":"חלק 1: היסודות","start":145.5,"sec":14,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":6,"title":"מודל שפה","start":159.5,"sec":72,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":7,"title":"חלון ההקשר","start":231.5,"sec":61.49999999999999,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":8,"title":"סוכן","start":293,"sec":74.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":9,"title":"המקרה: אתם הייתם ממזגים?","start":367.5,"sec":31.000000000000004,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":10,"title":"התשובה: העותק הלא נכון","start":398.5,"sec":119.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"worktree","title":"הרבה עותקים של אותו מאגר, וכלל אחד שמונע את הטעות","live":false,"via":null}]},{"n":11,"title":"שלושה סוגים של טעות","start":518,"sec":55.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"claim-checker","title":"לסוג השלישי יש אצלנו סוכן משלו","live":false,"via":null}]},{"n":12,"title":"חלק 2: שיטות העבודה","start":573.5,"sec":17.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":13,"title":"שיטה 1: בדיקה","start":591,"sec":84,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"checks","title":"בדיקה שהסוכן יכול להריץ: פעם אחת, ובלי מצב צפייה","live":false,"via":null}]},{"n":14,"title":"שיטה 2: תכנון","start":675,"sec":115,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"plan","title":"מצב תכנון: איך נכנסים, ומה מבקשים ממנו","live":false,"via":null}]},{"n":15,"title":"שיטה 3: ספציפיות","start":790,"sec":58.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"prompts","title":"אותו רעיון, בבקשות מהעולם שלכם","live":false,"via":null}]},{"n":16,"title":"שיטה 4: ניהול ההקשר","start":848.5,"sec":132,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"subagent","title":"סוכן משנה הוא קובץ אחד","live":true,"via":null}]},{"n":17,"title":"שיטה 5: כל טעות לכלל","start":980.5,"sec":98,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"hook","title":"כך נראה hook שחוסם עריכה של תיקיית Migrations","live":true,"via":null}]},{"n":18,"title":"חלק 3: איך אנחנו עובדים","start":1078.5,"sec":16.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":19,"title":"הפלייבוק","start":1095,"sec":52,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":20,"title":"מפתח חדש אצלנו","start":1147,"sec":36,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"doctor","title":"ככה נראית הבדיקה של ההתקנה","live":false,"via":null}]},{"n":21,"title":"מהכרטיס ועד המיזוג","start":1183,"sec":187.6,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":22,"title":"יום עבודה אצלנו","start":1370.6,"sec":47,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"skill","title":"נוהל כתוב, ושער כבר בצעד הראשון שלו","live":false,"via":null}]},{"n":23,"title":"מה נשאר אצלכם","start":1417.6,"sec":70,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"permissions","title":"הרשאות: מה מותר, על מה שואלים, ומה אסור","live":false,"via":null}]},{"n":24,"title":"חמישה הרגלים למחר","start":1487.6,"sec":63.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":25,"title":"איך מתחילים","start":1551.1,"sec":89,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"agents-md","title":"קובץ הנחיות ביום הראשון","live":true,"via":null},{"id":"gates","title":"שערים אוטומטיים: בדיקות שרצות בלי שמישהו יזכור","live":false,"via":"chip"}]},{"n":26,"title":"שאלות","start":1640.1,"sec":24,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":27,"title":"נספח: כללים קשיחים","start":1664.1,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]},{"n":28,"title":"נספח: חמש טעויות נפוצות","start":1664.1,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]},{"n":29,"title":"נספח: מילון מושגים","start":1664.1,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]},{"n":30,"title":"נספח: שאלות נפוצות","start":1664.1,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]}]</script>
 <script>
 (() => {
   const NOTES = JSON.parse(document.getElementById('notes').textContent);
@@ -934,6 +1122,7 @@
   let current = Number.isFinite(first) ? Math.min(slides.length - 1, Math.max(0, first - 1)) : 0;
   let step = stepsOf(slides[current]);
   let presenterWin = null;
+  let exOpen = null;                      // the example panel open over the current slide, if any
 
   function fit() {
     if (MODE.check) { deck.style.transform = 'none'; return; }
@@ -1196,10 +1385,48 @@
   }
   function setLaser(on) { document.body.classList.toggle('laser', on); }
 
+  // ---------------------------------------------------------------- examples
+  // A slide's example opens over it: from the button in its corner, from an element that names it (data-ex), or with
+  // E for the slide's main one. Whatever would move on closes an open example first, so a press never skips a slide.
+  function shut() {
+    if (!exOpen) return false;
+    exOpen.classList.remove('open');
+    exOpen.setAttribute('aria-hidden', 'true');
+    deck.querySelectorAll('[data-ex][aria-expanded="true"]').forEach((b) => b.setAttribute('aria-expanded', 'false'));
+    exOpen = null;
+    return true;
+  }
+  function closeEx() { if (!shut()) return false; tell(); return true; }
+  function openEx(id) {
+    const s = slides[current];
+    const p = id ? s.querySelector('.ex-panel[data-ex-panel="' + id + '"]') : s.querySelector('.ex-panel:not([data-via])');
+    if (!p) return;
+    if (exOpen === p) { closeEx(); return; }
+    shut();
+    resetZoom();
+    p.classList.add('open');
+    p.setAttribute('aria-hidden', 'false');
+    s.querySelectorAll('[data-ex="' + p.dataset.exPanel + '"]').forEach((b) => b.setAttribute('aria-expanded', 'true'));
+    exOpen = p;
+    tell();
+  }
+  function copyCode(btn) {
+    const text = btn.closest('.ex-file').querySelector('pre').innerText.replace(/\n$/, '');
+    const done = (ok) => { btn.textContent = ok ? 'הועתק' : 'לא הועתק'; setTimeout(() => { btn.textContent = 'העתקה'; }, 1500); };
+    try { navigator.clipboard.writeText(text).then(() => done(true), () => done(false)); } catch (e) { done(false); }
+  }
+  // #12&ex opens the slide's main example, #25&ex=gates a named one: for screenshots and the presenter's preview. It
+  // reads the address as it arrived, because drawing a slide writes the bare slide number back into it.
+  function exFromHash(h) {
+    const f = h.split('&').find((x) => x === 'ex' || x.startsWith('ex='));
+    if (f) openEx(f.split('=')[1]);
+  }
+
   // ---------------------------------------------------------------- navigation
   function render() {
     stopAll();
     resetZoom();
+    shut();
     slides.forEach((el, i) => el.classList.toggle('active', i === current));
     dots.forEach((d, i) => d.classList.toggle('active', i === current));
     bar.style.width = ((current + 1) / slides.length * 100) + '%';
@@ -1217,10 +1444,13 @@
     tell();
   }
   function tell() {
-    if (presenterWin && !presenterWin.closed) presenterWin.postMessage({ type: 'state', current, step, steps: stepsOf(slides[current]) }, '*');
+    if (presenterWin && !presenterWin.closed) {
+      presenterWin.postMessage({ type: 'state', current, step, steps: stepsOf(slides[current]), ex: exOpen ? exOpen.dataset.exPanel : null }, '*');
+    }
   }
   // forward shows the slide's next part before the next slide; back hides it before the slide before
   function go(dir) {
+    if (closeEx()) return;
     resetZoom();
     const s = slides[current], total = stepsOf(s);
     if (!MODE.static && dir > 0 && step < total) { step++; showSteps(s, step, true); applyStops(s, step); tell(); return; }
@@ -1253,7 +1483,11 @@
   }
 
   // a slide number put into the address moves there, in the deck and in the presenter window's previews
-  if (!MODE.check) addEventListener('hashchange', () => { const n = parseInt(location.hash.slice(1), 10); if (n) jump(n - 1); });
+  if (!MODE.check) addEventListener('hashchange', () => {
+    const h = location.hash.slice(1), n = parseInt(h, 10);
+    if (n) jump(n - 1);
+    exFromHash(h);
+  });
   if (!MODE.embed && !MODE.check) {
     let typed = '';
     document.addEventListener('keydown', (e) => {
@@ -1262,11 +1496,13 @@
       if (/^[0-9]$/.test(k)) { typed += k; return; }                       // a number then Enter jumps to that slide
       if (k === 'Enter' && typed) { jump(parseInt(typed, 10) - 1); typed = ''; e.preventDefault(); return; }
       typed = '';
+      // E is ק on a Hebrew layout
+      if (k.length === 1 && 'eEק'.includes(k)) { openEx(); return; }
       if (['ArrowLeft', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(k)) { go(1); e.preventDefault(); }
       else if (['ArrowRight', 'ArrowUp', 'PageUp', 'Backspace'].includes(k)) { go(-1); e.preventDefault(); }
       else if (k === 'Home') jump(0);
       else if (k === 'End') jump(slides.length - 1);
-      else if (k === 'Escape') { resetZoom(); document.body.classList.remove('zoommode'); setLaser(false); }
+      else if (k === 'Escape') { closeEx(); resetZoom(); document.body.classList.remove('zoommode'); setLaser(false); }
       // the same keys on a Hebrew layout: F is כ, P is פ, B is נ, L is ך, Z is ז
       else if ('fFכ'.includes(k)) toggleFS();
       else if ('pPפ'.includes(k)) openPresenter();
@@ -1278,6 +1514,14 @@
     // In zoom mode (Z), or with Alt held, a click enlarges what it lands on; the next click returns.
     deck.addEventListener('click', (e) => {
       if (e.target.closest('.dot')) return;
+      // an example: its close and copy buttons, what opens it, reading inside it; a click beside it closes it
+      if (e.target.closest('.ex-x')) { closeEx(); return; }
+      const copy = e.target.closest('.ex-copy');
+      if (copy) { copyCode(copy); return; }
+      const opener = e.target.closest('[data-ex]');
+      if (opener) { openEx(opener.dataset.ex); return; }
+      if (e.target.closest('.ex-panel')) return;
+      if (closeEx()) return;
       if (zoomed) { resetZoom(); return; }
       if (document.body.classList.contains('zoommode') || e.altKey) {
         document.body.classList.remove('zoommode');
@@ -1309,13 +1553,13 @@
       if (m.type === 'hello') { presenterWin = e.source; tell(); }
       else if (m.type === 'go') go(m.dir);
       else if (m.type === 'jump') jump(m.i);
+      else if (m.type === 'ex') openEx(m.id);
     });
   }
 
   render();
-  // The check lays out every slide in one pass, so it loads every face of the deck's font first: a weight that no
-  // slide has shown yet is not loaded when the fonts report ready, and the slides would be measured in another font.
-  if (MODE.check) Promise.all([...document.fonts].map((f) => f.load().catch(() => null))).then(() => document.fonts.ready).then(runCheck);
+  exFromHash(hash);
+  if (MODE.check) document.fonts.ready.then(runCheck);
 
   // ---------------------------------------------------------------- layout check
   // Every slide in turn, everything shown: anything outside the safe area, text cut off by its own
@@ -1333,9 +1577,11 @@
         // the film fills its slide on purpose, its own page is checked by its own tests, and a title kept for screen
         // readers is clipped to a point on purpose
         if (el.closest('.blob') || el.closest('.pagenum') || el.closest('.packet') || el.closest('svg') || el.closest('.film-wrap') ||
-            el.closest('.sr-only')) return;
+            el.closest('.sr-only') || el.closest('.ex-btn')) return;
         const r = el.getBoundingClientRect();
         if (!r.width || !r.height) return;
+        // an example's code is set on one line per line: a line longer than its window is cut off at the edge
+        if (el.tagName === 'PRE' && el.scrollWidth > el.clientWidth + 2) res.clipped.push(desc(el) + ' (a line wider than its window)');
         const top = r.top - dr.top, bottom = r.bottom - dr.top, left = r.left - dr.left, right = r.right - dr.left;
         if (top < 20 || bottom > 842 || left < 24 || right > 1576) {
           res.overflow.push({ el: desc(el), top: Math.round(top), bottom: Math.round(bottom), left: Math.round(left), right: Math.round(right) });
@@ -1352,7 +1598,7 @@
       // A slide is a flex column, so content taller than the slide shrinks its parts instead of leaving the safe area:
       // the parts then overlap, or what is inside one spills out of it. Neither shows up as overflow above.
       const skip = (el) => el.closest('.blob') || el.closest('.pagenum') || el.closest('.packet') || el.closest('svg') ||
-        el.closest('.film-wrap') || el.closest('.sr-only');
+        el.closest('.film-wrap') || el.closest('.sr-only') || el.closest('.ex-btn') || el.closest('.ex-panel');
       const parts = [...s.children].filter((c) => !skip(c) && !['absolute', 'fixed'].includes(getComputedStyle(c).position) &&
         c.getBoundingClientRect().height);
       for (let k = 1; k < parts.length; k++) {
@@ -1372,9 +1618,13 @@
       if (res.overflow.length || res.clipped.length || res.orphans.length || res.overlap.length) out.push(res);
     }
     const pre = document.getElementById('check-out');
+    // Slides measured in a fallback font pass or fail for the wrong reason, so the result also says whether the deck's
+    // font could draw Hebrew and Latin in every weight it declares. With no face of it at all, the answer is no.
     const faces = [...document.fonts].filter((f) => /Rubik/i.test(f.family));
-    pre.textContent = 'CHECK-FONTS ' + faces.filter((f) => f.status === 'loaded').length + ' of ' + faces.length +
-      '\nCHECK-RESULT ' + JSON.stringify(out);
+    const weights = [...new Set(faces.map((f) => f.weight))];
+    const drawn = weights.length > 0 && weights.every((w) => document.fonts.check(w + ' 20px Rubik', 'אבג Abc 123'));
+    pre.textContent = 'CHECK-FONTS ' + (drawn ? 'ready' : 'missing') + ', ' + faces.filter((f) => f.status === 'loaded').length +
+      ' of ' + faces.length + ' faces loaded\nCHECK-RESULT ' + JSON.stringify(out);
     pre.hidden = false;
   }
   // the words of a block, grouped by the line each one starts on
@@ -1414,6 +1664,7 @@
         '<span class="steps" id="p-steps"></span>' +
         '<span class="plan" id="p-plan"></span><span class="clock" id="p-clock">0:00</span>' +
         '<button id="p-start" type="button">התחל שעון</button><button id="p-reset" type="button">אפס</button>' +
+        '<button id="p-ex" type="button" hidden>דוגמה</button>' +
         '<button id="p-prev" type="button">הקודם</button><button id="p-next" type="button">הבא</button>' +
       '</div>' +
       '<div class="p-notes" id="p-notes"></div>' +
@@ -1421,33 +1672,52 @@
         '<div class="p-label">עכשיו על המסך</div><div class="p-frame"><iframe id="p-cur" title="השקף הנוכחי"></iframe></div>' +
         '<div class="p-label">השקף הבא: <span class="p-next-title" id="p-next-title"></span></div>' +
         '<div class="p-frame"><iframe id="p-nxt" title="השקף הבא"></iframe></div>' +
-        '<div class="p-keys">מקשים בחלון השקפים: כ מסך מלא, ך מצביע לייזר, ז זום ואז לחיצה על חלק בשקף, נ מסך שחור, מספר ואז אנטר קפיצה לשקף</div>' +
+        '<div class="p-keys">מקשים בחלון השקפים: ק פותח וסוגר דוגמה, כ מסך מלא, ך מצביע לייזר, ז זום ואז לחיצה על חלק בשקף, נ מסך שחור, מספר ואז אנטר קפיצה לשקף</div>' +
       '</div>';
     const $ = (id) => document.getElementById(id);
     const deckWin = window.opener;
-    let current = -1, t0 = null, acc = 0;
+    let current = -1, t0 = null, acc = 0, exNow = null;
 
     function send(m) {
       if (deckWin && !deckWin.closed) deckWin.postMessage(m, '*');
       else if (m.type === 'go') show(Math.min(NOTES.length - 1, Math.max(0, current + m.dir)), 0, 0);
     }
-    function fmt(p) { return esc(p).replace(/\[([^\]]*)\]/g, '<span class="dir">[$1]</span>'); }
-    function show(i, stepNow, steps) {
+    // A Latin token that starts with a dot or a slash (/context, .env) flips in a right-to-left line unless isolated.
+    function fmt(p) {
+      return esc(p).replace(/(^|[\s(])([.\/][A-Za-z][\w.\/+-]*)/g, '$1<bdi>$2</bdi>')
+        .replace(/\[([^\]]*)\]/g, '<span class="dir">[$1]</span>');
+    }
+    function show(i, stepNow, steps, ex) {
       if (t0 === null && acc === 0 && i > 0) start();          // the clock starts with the first move on
       $('p-steps').textContent = steps ? 'חלקים בשקף: ' + stepNow + ' מתוך ' + steps : '';
       $('p-steps').className = 'steps' + (steps && stepNow < steps ? ' more' : '');
+      // the preview shows what the audience sees, an open example included
+      if (i === current && (ex || null) !== exNow) {
+        exNow = ex || null;
+        $('p-ex').classList.toggle('on', !!exNow);
+        $('p-cur').src = base + '#' + (i + 1) + '&embed' + (exNow ? '&ex=' + exNow : '');
+      }
       if (i === current) return;                                  // a new part of the same slide: the script stays
       current = i;
-      const m = NOTES[i];
+      exNow = ex || null;
+      const m = NOTES[i], exs = m.ex || [];
       $('p-count').textContent = (i + 1) + ' / ' + NOTES.length;
       $('p-title').textContent = m.title;
       $('p-plan').textContent = m.appendix ? 'נספח, לא מציגים' : 'מתוכנן מדקה ' + mmss(m.start) + ' עד ' + mmss(m.start + m.sec);
-      const meta = [m.src ? 'מקור: ' + esc(m.src) : '', m.verify ? 'לאמת לפני ההרצאה: ' + esc(m.verify) : ''].filter(Boolean);
-      $('p-notes').innerHTML = (m.cut ? '<span class="p-tag">אפשר לדלג</span>' : '') +
-        m.script.map((p) => '<p>' + fmt(p) + '</p>').join('') +
+      $('p-ex').hidden = !exs.some((x) => !x.via);
+      $('p-ex').classList.toggle('on', !!exNow);
+      const meta = [m.src ? 'מקור: ' + esc(m.src) : '', m.verify ? 'לאמת לפני ההרצאה: ' + esc(m.verify) : '']
+        .concat(exs.filter((x) => x.src).map((x) => 'מקור הדוגמה: ' + esc(x.src))).filter(Boolean);
+      const exTags = exs.length ? '<div class="p-ex">' + exs.map((x) => '<span class="p-tag ex' + (x.live ? ' live' : '') + '">' +
+        (x.live ? 'דוגמה לפתוח עכשיו: ' : 'דוגמה, אם יש זמן או שאלה: ') + esc(x.title) + (x.via ? ' (בלחיצה על התגיות בשקף)' : ' (ק)') +
+        '</span>').join('') + '</div>' : '';
+      const more = (m.more || []).length ? '<div class="more"><div class="more-h">עוד מה להגיד, אם יש זמן</div>' +
+        m.more.map((p) => '<p>' + fmt(p) + '</p>').join('') + '</div>' : '';
+      $('p-notes').innerHTML = (m.cut ? '<span class="p-tag">אפשר לדלג</span>' : '') + exTags +
+        m.script.map((p) => '<p>' + fmt(p) + '</p>').join('') + more +
         (meta.length ? '<div class="meta">' + meta.join('<br>') + '</div>' : '');
       $('p-notes').scrollTop = 0;
-      $('p-cur').src = base + '#' + (i + 1) + '&embed';
+      $('p-cur').src = base + '#' + (i + 1) + '&embed' + (exNow ? '&ex=' + exNow : '');
       $('p-nxt').src = base + '#' + Math.min(NOTES.length, i + 2) + '&embed';
       $('p-next-title').textContent = NOTES[i + 1] ? NOTES[i + 1].title : 'סוף ההרצאה';
       tick();
@@ -1466,11 +1736,13 @@
     $('p-reset').addEventListener('click', () => { t0 = null; acc = 0; $('p-start').textContent = 'התחל שעון'; tick(); });
     $('p-prev').addEventListener('click', () => send({ type: 'go', dir: -1 }));
     $('p-next').addEventListener('click', () => send({ type: 'go', dir: 1 }));
+    $('p-ex').addEventListener('click', () => send({ type: 'ex' }));
     document.addEventListener('keydown', (e) => {
       if (['ArrowLeft', 'ArrowDown', 'PageDown', ' '].includes(e.key)) { send({ type: 'go', dir: 1 }); e.preventDefault(); }
       else if (['ArrowRight', 'ArrowUp', 'PageUp'].includes(e.key)) { send({ type: 'go', dir: -1 }); e.preventDefault(); }
+      else if ('eEק'.includes(e.key) && e.key.length === 1) send({ type: 'ex' });
     });
-    addEventListener('message', (e) => { if (e.data && e.data.type === 'state') show(e.data.current, e.data.step || 0, e.data.steps || 0); });
+    addEventListener('message', (e) => { if (e.data && e.data.type === 'state') show(e.data.current, e.data.step || 0, e.data.steps || 0, e.data.ex); });
     if (deckWin) deckWin.postMessage({ type: 'hello' }, '*');
     show(0, 0, 0);
   }
