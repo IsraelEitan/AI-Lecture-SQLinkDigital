@@ -10,8 +10,8 @@
 <style>
 :root{
     --navy:#0B1220; --navy2:#121B2E; --teal:#14B8A6; --teal-light:#5EEAD4; --teal-dark:#0F766E;
-    --gold:#F59E0B; --purple:#9333EA; --red:#EF4444; --red-box:#DC2626; --red-dark:#B91C1C;
-    --blue-box:#2563EB; --ink:#0F172A; --muted:#64748B; --card:#F1F5F9; --line:#E2E8F0; --white:#FFFFFF;
+    --gold:#F59E0B; --purple:#9333EA; --purple-light:#C084FC; --pink:#DB2777; --pink-light:#F472B6; --red:#EF4444; --red-box:#DC2626; --red-dark:#B91C1C;
+    --blue-box:#2563EB; --ink:#0F172A; --muted:#475569; --card:#F1F5F9; --line:#E2E8F0; --white:#FFFFFF;
     --ease:cubic-bezier(0.16, 1, 0.3, 1);
     --mono:"Cascadia Code", Consolas, "Courier New", monospace;
   }
@@ -138,7 +138,7 @@
 <script>
 // The film's story: what is on screen and when. Every step follows the playbook's skills as they stand in
 // engineering-playbook (start-task, write-ticket, ask-product, finish-task, handoff, secret-handoff,
-// technical-engineering-email), its four hooks, its subagents and playbook_sync.py, and the order of the steps is the
+// technical-engineering-email), its eight hooks, its subagents and playbook_sync.py, and the order of the steps is the
 // skills' own. The ticket, the branch, the times of day and the outputs are an illustration, which the tag in the
 // corner says. The lesson at the end is the one the lecture opens with: the tests that ran in the wrong copy.
 window.FILM_STORY = {
@@ -175,21 +175,22 @@ window.FILM_STORY = {
     ], hold: 1.0 },
 
     { title: "/start-task", stage: 1, clear: true, time: "09:02",
-      caption: "קודם הוא קורא את הכרטיס, ושואל חמש שאלות. אחת נכשלת? הוא עוצר ומדווח.", beats: [
+      caption: "קודם הוא קורא את הכרטיס, ושואל שש שאלות. אחת נכשלת? הוא עוצר ומדווח.", beats: [
       { type: "/start-task BN-1234" },
       { out: "Jira  getJiraIssue BN-1234", to: "term>jira", node: "jira", note: "קורא את הכרטיס", mark: "var(--teal)", wait: 1.2 },
-      { say: "חמש שאלות: בתחום שלנו, מחכה להחלטה, חסום, חסר מידע, כבר נעשה.", wait: 2.4 },
+      { say: "שש שאלות: בתחום שלנו, מחכה להחלטה, חסום, חסר מידע, כבר נעשה, ועל איזה קו גרסה.", wait: 2.4 },
       { out: "git  ls-remote --heads origin *BN-1234*", to: "term>git", node: "git", note: "אין ענף קיים", mark: "var(--teal)", wait: 1.2 },
+      { out: "release_line.py  LINE  release/1.1, from Fix Version v1.1.0", to: "term>git", node: "git", note: "הקו מגיע מהכרטיס", mark: "var(--teal)", wait: 1.4 },
       { say: "השער עבר.", kind: "say good", wait: 1.2 },
-      { caption: "הוא פותח תת-משימה, ויוצר ענף ועותק עבודה נפרד מהגרסה העדכנית.", time: "09:05",
+      { caption: "הוא פותח תת-משימה, ויוצר ענף ועותק עבודה נפרד מקו הגרסה של הכרטיס.", time: "09:05",
         out: "Jira  createJiraIssue  Sub-task of BN-1234", to: "term>jira", node: "jira", note: "תת-משימה נפתחה", mark: "var(--teal)", wait: 1.3 },
       { out: "git  worktree add --no-track", to: "term>git", node: "git", note: "ענף ועותק עבודה חדשים", mark: "var(--teal)", wait: 0.3 },
       { out: "     -b feature/BN-1234/export-audit-report", mark: "transparent", wait: 0.3 },
-      { out: "     C:\\Dev\\work\\BN-1234\\bd-ms origin/release/6.b.5", mark: "transparent", wait: 2.2 },
+      { out: "     C:\\Dev\\work\\BN-1234\\bd-ms origin/release/1.1", mark: "transparent", wait: 2.2 },
       { caption: "לפני שורת קוד אחת: מה זז בגרסה, מיזוג, וכל הבדיקות. התנגשות עוצרת הכול.", time: "09:08",
-        out: "release-scout  what moved on release/6.b.5", to: "term>git", node: "git", note: "מה זז בגרסה", mark: "var(--purple)", wait: 0.2 },
+        out: "release-scout  what moved on release/1.1", to: "term>git", node: "git", note: "מה זז בגרסה", mark: "var(--purple)", wait: 0.2 },
       { pb: true, chips: ["agents"], wait: 1.2 },
-      { out: "git  merge origin/release/6.b.5", to: "term>git", node: "git", note: "הגרסה מוזגה", mark: "var(--teal)", wait: 1.2 },
+      { out: "git  merge origin/release/1.1", to: "term>git", node: "git", note: "הגרסה מוזגה", mark: "var(--teal)", wait: 1.2 },
       { out: "dotnet build, then every test assembly", to: "term>tests", node: "tests", note: "כל הבדיקות רצו", mark: "var(--teal)", wait: 1.3 },
       { out: "build ok, every assembly passed", kind: "ok", mark: "#7EE787", time: "09:24", wait: 1.4 },
       { caption: "הכרטיס ותת-המשימה עוברים לסטטוס In Progress והסשן מקבל שם לפי הכרטיס.",
@@ -236,10 +237,13 @@ window.FILM_STORY = {
     ], hold: 0.8 },
 
     { title: "/finish-task", stage: 4, clear: true, time: "16:10",
-      caption: "הוא פותח PR כטיוטה דרך ה-API של Bitbucket ומחזיר קישור מלא.", beats: [
+      caption: "לפני ה-PR יש סקירה בהקשר נקי: סוכן שלא כתב את הקוד מחפש מה נשבר.", beats: [
       { type: "/finish-task" },
-      { out: "Bitbucket API  POST pullrequests  draft: true", to: "term>bitbucket", node: "bitbucket", note: "PR כטיוטה", mark: "var(--teal)", wait: 1.2 },
-      { out: "201 Created  draft PR to release/6.b.5", kind: "ok", mark: "#7EE787", wait: 2.0 },
+      { out: "code-review (fresh context)  regressions, nearby inputs, acceptance", to: "term>tests", node: "tests", note: "סקירה בהקשר נקי", mark: "var(--purple)", wait: 1.4 },
+      { say: "הממצאים מתוקנים, ונכנסים לתיאור ה-PR.", wait: 2.2 },
+      { caption: "ורק אז הוא פותח PR כטיוטה דרך ה-API של Bitbucket ומחזיר קישור מלא.", time: "16:25",
+        out: "Bitbucket API  POST pullrequests  draft: true", to: "term>bitbucket", node: "bitbucket", note: "PR כטיוטה", mark: "var(--teal)", wait: 1.2 },
+      { out: "201 Created  draft PR to release/1.1", kind: "ok", mark: "#7EE787", wait: 2.0 },
       { caption: "את ה-PR ממזג אדם, או הסוכן כשביקשו ממנו במפורש למזג אותו.",
         say: "ה-PR פתוח כטיוטה, ממתין לאדם.", kind: "wait", wait: 3.6 },
       { caption: "לפני המשימה הבאה הוא בודק שוב כל PR שפתח. את מה שמוזג הוא מעביר בלוח.", time: "17:05",
@@ -261,7 +265,7 @@ window.FILM_STORY = {
     ], hold: 0.8 },
 
     { title: "/handoff", stage: 4, clear: true, time: "18:20",
-      caption: "ב-90% מהחלון הוא כותב דף מצב ופתיחה, ואדם מדביק אותה בסשן הבא.", beats: [
+      caption: "ב-85% מהחלון hook מודיע, והוא כותב דף מצב ופתיחה שאדם מדביק בסשן הבא.", beats: [
       { type: "/handoff" },
       { out: "STATUS-BN-1234.md  where the work stands", mark: "#94A3B8", wait: 1.0 },
       { out: "NEXT-AGENT-PROMPT.md  the next session's opening", mark: "#94A3B8", wait: 3.0 },
@@ -276,8 +280,9 @@ window.FILM_STORY = {
       { caption: "הקובץ שנערך קובע מי מקבל. לקח בהנחיות המשותפות מגיע לכל העותקים.",
         out: "apply  every checkout: bd-ms, bd-client, workspace", mark: "var(--purple)", wait: 0.2 },
       { pb: true, chips: ["rules", "bdms", "bdclient", "ws"], wait: 2.6 },
-      { out: "push  engineering-playbook to origin/main", to: "term>bitbucket", node: "bitbucket", note: "הפלייבוק עודכן", mark: "var(--purple)", wait: 2.0 },
-      { caption: "למחרת בבוקר ה-hook של כל מפתח מושך את העדכון, והכלל כבר שם.", time: "08:55", day: 1, wait: 2.4 },
+      { out: "push  branch playbook/<you>/<time>, pull request into main", to: "term>bitbucket", node: "bitbucket", note: "PR לפלייבוק", mark: "var(--purple)", wait: 1.6 },
+      { caption: "main מקבל רק את הדחיפות של הבעלים, אז לקח של מפתח נכנס דרך PR.", wait: 2.4 },
+      { caption: "אחרי שה-PR מוזג, למחרת בבוקר ה-hook של כל אחד מושך את העדכון, והכלל כבר שם.", time: "08:55", day: 1, wait: 2.4 },
       { out: "playbook 7d41a2c f12f8df->7d41a2c  workspace  2 updated", kind: "small", to: "pb>term", mark: "var(--purple)", wait: 0.2 },
       { out: "   updated: CLAUDE.md, AGENTS.md", mark: "transparent", wait: 0.2 },
       { pb: true, chips: ["rules", "bdms", "bdclient", "ws"], wait: 3.0 },

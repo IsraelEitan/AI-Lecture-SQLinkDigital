@@ -11,7 +11,7 @@
 <style>
   :root{
     --navy:#0B1220; --navy2:#121B2E; --teal:#14B8A6; --teal-light:#5EEAD4; --teal-dark:#0F766E;
-    --gold:#F59E0B; --purple:#9333EA; --purple-light:#C084FC; --pink:#DB2777; --red:#EF4444; --red-box:#DC2626; --red-dark:#B91C1C;
+    --gold:#F59E0B; --purple:#9333EA; --purple-light:#C084FC; --pink:#DB2777; --pink-light:#F472B6; --red:#EF4444; --red-box:#DC2626; --red-dark:#B91C1C;
     --blue-box:#2563EB; --ink:#0F172A; --muted:#475569; --card:#F1F5F9; --line:#E2E8F0; --white:#FFFFFF;
     --ease:cubic-bezier(0.16, 1, 0.3, 1);
     --mono:"Cascadia Code", Consolas, "Courier New", monospace;
@@ -403,6 +403,21 @@
   .chips.three .chip{ flex:1; text-align:center; }
   /* a muted line beside a chip, read with it */
   .chips .chip-note{ align-self:center; color:var(--muted); font-size:22px; }
+  /* the eight hooks in two labelled rows, under the two cards */
+  .hookrow{ margin-top:26px; display:flex; flex-direction:column; gap:12px; }
+  .hookrow p{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .hookrow b{ font-size:21px; min-width:190px; }
+  .hookrow .chip{ font-size:17px; padding:6px 13px; border-radius:9px; }
+  .hookrow .gatechip{ background:var(--blue-box); }
+  /* the same list when it carries seven steps instead of three */
+  .start.seven{ margin-top:6px; gap:4px; }
+  .start.seven .srow{ gap:14px; align-items:center; }
+  .start.seven .srow h3{ font-size:20px; }
+  .start.seven .srow p{ font-size:16px; margin-top:0; }
+  .start.seven .chips{ margin-top:2px; gap:10px; }
+  .start.seven .chip{ padding:5px 12px; font-size:15px; border-radius:8px; }
+  .start.seven .chips .chip-note{ font-size:18px; }
+  .start.seven .badge{ width:34px; height:34px; font-size:19px; }
   /* an example rule, in Hebrew, under a step */
   .srow .quote{ margin-top:10px; background:var(--card); border-right:4px solid var(--gold); border-radius:10px; padding:10px 18px;
                 font-size:24px; color:var(--ink); }
@@ -593,10 +608,10 @@
 </section>
 <section class="slide" data-n="4" aria-label="המפה והמטרות">
   
-  <h2 class="title-lg reveal" data-d="1">שלושה חלקים, ומה תדעו בסוף כל אחד</h2>
+  <h2 class="title-lg reveal" data-d="1">ארבעה חלקים, ומה תדעו בסוף כל אחד</h2>
   <p class="lead reveal" data-d="2">כל חלק נשען על הקודם.</p>
   <div class="rows">
-    <div class="row reveal" data-d="3"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><h3>היסודות</h3><p>תבינו איך עוזר קוד מבוסס AI עובד, ולמה הוא טועה דווקא כשהכל נראה תקין</p></div><div class="row reveal" data-d="4"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><h3>שיטות העבודה</h3><p>תכירו חמש שיטות שתופסות את הטעויות האלה בזמן, ותבינו למה הן עובדות</p></div><div class="row reveal" data-d="5"><span class="badge " style="background:var(--purple);color:#fff">3</span><h3>איך אנחנו עובדים</h3><p>תראו איך צוות אחד בנה את זה, ומה אפשר לקחת לפרויקט שלכם</p></div>
+    <div class="row reveal" data-d="3"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><h3>היסודות</h3><p>תבינו איך עוזר קוד מבוסס AI עובד, ולמה הוא טועה דווקא כשהכל נראה תקין</p></div><div class="row reveal" data-d="4"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><h3>שיטות העבודה</h3><p>תכירו חמש שיטות שתופסות את הטעויות האלה בזמן, ותבינו למה הן עובדות</p></div><div class="row reveal" data-d="5"><span class="badge " style="background:var(--purple);color:#fff">3</span><h3>איך אנחנו עובדים</h3><p>תראו איך צוות אחד בנה את זה, ומה אפשר לקחת לפרויקט שלכם</p></div><div class="row reveal" data-d="6"><span class="badge " style="background:var(--pink);color:#fff">4</span><h3>כשכלל לא מספיק</h3><p>תראו מה עושים כשכלל כתוב ונטען נשבר בכל זאת, ואיך נראית בדיקה של שער עוד לפני ההתקנה שלו</p></div>
   </div>
   <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>ככה מסומן מושג חדש</b><span class="m">הגדרה קצרה, במקום שבו המילה מופיעה לראשונה</span></div>
   <div class="pagenum">04</div>
@@ -614,11 +629,11 @@
       </div>
       <div class="dv-num reveal" data-d="2" style="color:var(--teal)">01</div>
     </div>
-    <div class="route reveal" data-d="6"><span class="on" style="background:var(--teal);color:var(--navy)"><small>חלק 1</small><b>היסודות</b></span><span class="" style=""><small>חלק 2</small><b>שיטות העבודה</b></span><span class="" style=""><small>חלק 3</small><b>איך אנחנו עובדים</b></span></div>
+    <div class="route reveal" data-d="6"><span class="on" style="background:var(--teal);color:var(--navy)"><small>חלק 1</small><b>היסודות</b></span><span class="" style=""><small>חלק 2</small><b>שיטות העבודה</b></span><span class="" style=""><small>חלק 3</small><b>איך אנחנו עובדים</b></span><span class="" style=""><small>חלק 4</small><b>כשכלל לא מספיק</b></span></div>
   <div class="pagenum">05</div>
 </section>
 <section class="slide" data-n="6" aria-label="מודל שפה">
-  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <h2 class="title-lg reveal" data-d="1">מודל שפה משלים טקסט, ואת הקוד שלנו הוא לא מכיר</h2>
   <p class="lead reveal" data-d="2">עוזרי קוד כמו Claude, ChatGPT או Copilot בנויים כולם על מודל שפה.</p>
   <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>מודל שפה (LLM)</b><span class="m">תוכנה שלמדה מכמות עצומה של טקסט וקוד, ומנבאת בכל צעד את ההמשך הסביר</span></div>
@@ -627,7 +642,7 @@
   <div class="pagenum">06</div>
 </section>
 <section class="slide" data-n="7" aria-label="חלון ההקשר">
-  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <h2 class="title-lg reveal" data-d="1">חלון ההקשר: כל מה שהמודל רואה, במקום מוגבל</h2>
   <p class="lead reveal" data-d="2">ההוראות, השיחה, כל קובץ שהוא קרא וכל פלט של פקודה נמצאים באותו חלון.</p>
   <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>טוקן (token)</b><span class="m">יחידת הטקסט שהמודל קורא וכותב, לרוב חלק ממילה. גודל החלון נמדד בטוקנים</span></div>
@@ -637,10 +652,22 @@
   <div class="twocol"><div class="card warn head reveal" data-d="4"><div class="card-label">ככל שהחלון מתמלא, האיכות יורדת</div><p>לתופעה הזאת קוראים context rot</p></div><div class="card head reveal" data-d="5"><div class="card-label">השיחה לא נשמרת בין סשנים</div><p>בשביל זה יש קבצי הנחיות שנטענים בכל סשן:</p><p><code>CLAUDE.md, AGENTS.md</code></p></div></div>
   <div class="callout reveal" data-d="6"><span>חלון ההקשר מוגבל, ולכן צריך לנהל אותו.</span></div>
   </div>
+  <button class="ex-btn" type="button" data-ex="context" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel two" data-ex-panel="context" role="dialog" aria-hidden="true" aria-label="מה באמת היה בחלון: 183 סשנים במחשב שלי">
+    <div class="ex-head"><h3>מה באמת היה בחלון: 183 סשנים במחשב שלי</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>בפתיחת סשן, לפני שכתבתי מילה</span><span class="ex-path"><code>measure_sessions.py all</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">183 sessions, 30 Aug to 4 Oct 2026, one machine</span><span class="ln"> </span><span class="ln hot">context at the first request   median 79K   (p10 50K, p90 89K)</span><span class="ln">   of that, the instruction files, back then   an estimated 20 to 25K</span><span class="ln">   opened in C:/Dev                            about 79K</span><span class="ln">   opened in one repository, or elsewhere      46 to 50K</span></code></pre></div>
+    <div class="ex-file"><div class="ex-tab"><span>ואיפה החשבון באמת נצבר</span><span class="ex-path"><code>measure_sessions.py all</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">peak context     median 595K, p90 973K, max 998K   (a 1M window)</span><span class="ln"> </span><span class="ln">cache-read tokens, by the context the call already held:</span><span class="ln">   above 100K     99.6% of all cache-read tokens</span><span class="ln hot">   above 400K     78.6%</span><span class="ln">   above 700K     39.8%</span><span class="ln"> </span><span class="ln">compactions      66, in 33 of the 183 sessions</span></code></pre></div></div>
+    <p class="ex-note">הפתיחה היא לכל היותר 16 אחוז מהחשבון. רוב הקריאה החוזרת קורית בזנב הארוך של סשן ארוך, ולכן מה שנכנס מוקדם עולה הכי הרבה.</p>
+    
+    <p class="ex-vscode">ב-Claude Code הפקודה <code>/context</code> מציירת את החלון הנוכחי כרשת צבעונית, ומסמנת כלים וקבצי זיכרון שתופסים הרבה.</p>
+  </div>
   <div class="pagenum">07</div>
 </section>
 <section class="slide" data-n="8" aria-label="סוכן">
-  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <h2 class="title-lg reveal" data-d="1">סוכן: מודל עם כלים, שעובד בלולאה</h2>
   <p class="lead reveal" data-d="2">בניגוד לצ'אט, סוכן עובד בעצמו: קורא קבצים, מריץ פקודות, עורך קוד ובודק את התוצאה.</p>
   <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>harness</b><span class="m">התוכנה שעוטפת את המודל, נותנת לו כלים ומנהלת את ההקשר וההרשאות. למשל Claude Code</span></div>
@@ -655,7 +682,7 @@
   <div class="pagenum">08</div>
 </section>
 <section class="slide dark" data-n="9" aria-label="המקרה: אתם הייתם ממזגים?">
-  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <div class="blob" style="width:560px;height:560px;bottom:-240px;left:-240px;background:var(--navy2)"></div><h2 class="title-lg reveal" data-d="1">מקרה אמיתי: אתם הייתם ממזגים?</h2>
   <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>worktree</b><span class="m">עותק עבודה נוסף של אותו מאגר בתיקייה נפרדת. אצלנו יש מהם הרבה, עם אותם נתיבים</span></div>
   <p class="case-line reveal" data-d="3">בשינוי מסוים נוספו בדיקות חדשות. הסוכן הריץ את כל הבדיקות, וחזר עם התוצאה הזו:</p>
@@ -663,7 +690,7 @@
   <div class="pagenum">09</div>
 </section>
 <section class="slide" data-n="10" aria-label="התשובה: העותק הלא נכון">
-  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <h2 class="title-lg reveal" data-d="1">הבדיקות באמת רצו, אבל על העותק הלא נכון</h2>
   <div class="twocol tight">
     <div class="card reveal" data-d="2"><div class="card-label">מה הפלט אמר</div><p class="big-num">1142 עברו, 0 נכשלו</p></div>
@@ -693,8 +720,8 @@
   <div class="ex-panel two" data-ex-panel="worktree" role="dialog" aria-hidden="true" aria-label="הרבה עותקים של אותו מאגר, וכלל אחד שמונע את הטעות">
     <div class="ex-head"><h3>הרבה עותקים של אותו מאגר, וכלל אחד שמונע את הטעות</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
     <div class="ex-body">
-    <div class="ex-file"><div class="ex-tab"><span>שלושה מתוך 110 העותקים שאצלי</span><span class="ex-path"><code>git worktree list</code><button class="ex-copy" type="button">העתקה</button></span></div>
-      <pre dir="ltr"><code><span class="ln">C:/Dev/work/BN-1549/bd-ms   debf5fcf4 [bugfix/BN-2394/meeting-search-stale-results]</span><span class="ln">C:/Dev/work/BN-156/bd-ms    322edd675 [feature/BN-156/committee-settings-log-text]</span><span class="ln">C:/Dev/work/BN-167/bd-ms    b61fe3df8 [feature/BN-167/help-center-activity-log]</span></code></pre></div>
+    <div class="ex-file"><div class="ex-tab"><span>שלושה מתוך 126 העותקים שאצלי</span><span class="ex-path"><code>git worktree list</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">C:/Dev/work/BN-156/bd-ms    322edd675 [feature/BN-156/committee-settings-log-text]</span><span class="ln">C:/Dev/work/BN-167/bd-ms    b61fe3df8 [feature/BN-167/help-center-activity-log]</span><span class="ln">C:/Dev/work/BN-2350/bd-ms   8c5411f97 [bugfix/BN-2350/worker-scoped-tenant-accessor]</span></code></pre></div>
     <div class="ex-file"><div class="ex-tab"><span>ככה נראית הרצה לפי הכלל</span><span class="ex-path"><code>PowerShell</code><button class="ex-copy" type="button">העתקה</button></span></div>
       <pre dir="ltr"><code><span class="ln hot">Set-Location C:\Dev\work\BN-167\bd-ms</span><span class="ln hot">if ((Get-Location).Path -ne 'C:\Dev\work\BN-167\bd-ms') { throw 'wrong tree' }</span><span class="ln">dotnet test</span></code></pre></div></div>
     <p class="ex-note">כל העותקים נראים אותו דבר מבפנים, ולכן הכלל אצלנו: כל הרצה של בדיקות מתחילה בנתיב מלא, ונעצרת אם היא לא במקום הנכון.</p>
@@ -704,7 +731,7 @@
   <div class="pagenum">10</div>
 </section>
 <section class="slide" data-n="11" aria-label="שלושה סוגים של טעות">
-  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="on" style="background:var(--teal);color:var(--navy)">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <h2 class="title-lg reveal" data-d="1">איפה הטעות: בעובדה, בשאלה, או במסקנה</h2>
   <div class="types big"><div class="type reveal" data-d="2"><i style="background:var(--teal)"></i><h4>עובדה שגויה</h4><p>הזיה, ולרוב קל לתפוס אותה</p></div><div class="type reveal" data-d="3"><i style="background:var(--gold)"></i><h4>עובדה נכונה, לשאלה אחרת</h4><p>כמו כאן, וקשה לתפוס</p></div><div class="type hot reveal" data-d="4"><i style="background:var(--red)"></i><h4>עובדה נכונה, ומסקנה רחבה מדי</h4><p>היקרה ביותר, כי הכל נראה בסדר</p></div></div>
   <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>שער (gate)</b><span class="m">נקודה קבועה שבה עוצרים, וממשיכים רק כשיש ראיה</span></div>
@@ -734,11 +761,11 @@
       </div>
       <div class="dv-num reveal" data-d="2" style="color:var(--gold)">02</div>
     </div>
-    <div class="route reveal" data-d="6"><span class="" style=""><small>חלק 1</small><b>היסודות</b></span><span class="on" style="background:var(--gold);color:var(--navy)"><small>חלק 2</small><b>שיטות העבודה</b></span><span class="" style=""><small>חלק 3</small><b>איך אנחנו עובדים</b></span></div>
+    <div class="route reveal" data-d="6"><span class="" style=""><small>חלק 1</small><b>היסודות</b></span><span class="on" style="background:var(--gold);color:var(--navy)"><small>חלק 2</small><b>שיטות העבודה</b></span><span class="" style=""><small>חלק 3</small><b>איך אנחנו עובדים</b></span><span class="" style=""><small>חלק 4</small><b>כשכלל לא מספיק</b></span></div>
   <div class="pagenum">12</div>
 </section>
 <section class="slide" data-n="13" aria-label="שיטה 1: בדיקה">
-  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <p class="kicker reveal" data-d="1">שיטה 1 מתוך 5</p><h2 class="title-lg reveal" data-d="1">לתת לסוכן דרך לבדוק את עצמו</h2><p class="lead reveal" data-d="2">בדיקה שהסוכן מריץ בעצמו היא ההבדל בין סשן שצריך להשגיח עליו לבין סשן שאפשר לעזוב.</p><p class="gate reveal" data-d="3"><span class="tag">שער</span><span>לפני שאומרים "סיימתי": בדיקה שרצה, עם פלט שראיתם</span></p>
     <div class="twocol"><div class="card  reveal" data-d="4"><div class="card-label">למה</div><p>הסוכן עוצר כשהעבודה <b>נראית</b> גמורה.</p><p>בלי בדיקה, אתם צריכים לבדוק במקומו.</p><p>עם בדיקה, הוא מתקן לבד, בלי לגעת בבדיקה.</p></div><div class="card tint reveal" data-d="5"><div class="card-label">איך עושים</div><ul><li>בדיקה שמחזירה עבר או נכשל: טסטים, build או צילום מסך</li><li>לבקש לראות את הפלט של הבדיקה</li><li>"תריץ את הטסטים ותראה לי את הפלט"</li></ul></div></div>
     <div class="callout reveal" data-d="6"><span class="ours">אצלנו</span><span>אומרים "סיימתי" רק אחרי בדיקה שיכלה להיכשל, ולא נכשלה.</span></div>
@@ -755,7 +782,7 @@
   <div class="pagenum">13</div>
 </section>
 <section class="slide" data-n="14" aria-label="שיטה 2: תכנון">
-  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <p class="kicker reveal" data-d="1">שיטה 2 מתוך 5</p><h2 class="title-lg reveal" data-d="1">קודם לחקור ולתכנן, ורק אחר כך לכתוב קוד</h2><p class="lead reveal" data-d="2">סוכן שקופץ ישר לקוד עלול לפתור היטב את הבעיה הלא נכונה.</p><div class="term reveal" data-d="2"><span class="tag">מושג</span><b>plan mode</b><span class="m">מצב שבו הסוכן רק קורא ומתכנן, בלי לשנות אף קובץ</span></div><p class="gate reveal" data-d="3"><span class="tag">שער</span><span>לפני שכותבים קוד: תוכנית שקראתם ואישרתם</span></p>
     <div class="twocol"><div class="card  reveal" data-d="4"><div class="card-label">ארבעה שלבים</div><ul><li><b>לחקור</b> בלי לשנות כלום</li><li><b>לתכנן</b> ולקרוא את התוכנית</li><li><b>לממש</b> עם בדיקות</li><li><b>לסגור</b> עם commit ופתיחת PR</li></ul></div><div class="card tint reveal" data-d="5"><div class="card-label">מתי לדלג</div><p>שינוי שאפשר לתאר במשפט אחד, פשוט עושים.</p><p>תכנון שווה את הזמן כשלא ברור איך, כשנוגעים בכמה קבצים, או כשלא מכירים את הקוד.</p></div></div>
     <div class="callout reveal" data-d="6"><span class="ours">אצלנו</span><span>לפני שנוצר ענף, <code>/start-task</code> שואל אם בכלל להתחיל.</span></div>
@@ -774,7 +801,7 @@
   <div class="pagenum">14</div>
 </section>
 <section class="slide" data-n="15" aria-label="שיטה 3: ספציפיות">
-  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <p class="kicker reveal" data-d="1">שיטה 3 מתוך 5</p><h2 class="title-lg reveal" data-d="1">להיות ספציפיים: מה הבעיה, איפה, ואיך נראה תיקון</h2>
   <p class="lead reveal" data-d="2">ככל שהבקשה מפורטת יותר, צריך פחות סבבים של תיקונים.</p>
   <div class="compare">
@@ -796,11 +823,11 @@
   <div class="pagenum">15</div>
 </section>
 <section class="slide" data-n="16" aria-label="שיטה 4: ניהול ההקשר">
-  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <p class="kicker reveal" data-d="1">שיטה 4 מתוך 5</p><h2 class="title-lg reveal" data-d="1">לנהל את ההקשר: סשן נקי לכל משימה</h2>
   <p class="lead reveal" data-d="2">ככל שהחלון מתמלא, האיכות יורדת. ארבע פעולות עוזרות לשמור עליו נקי:</p>
   <div class="term reveal" data-d="2"><span class="tag">מושג</span><b>סוכן משנה (subagent)</b><span class="m">סוכן נפרד עם חלון הקשר משלו: מקבל משימה, ומחזיר רק את המסקנה</span></div>
-  <div class="grid4"><div class="ncard reveal" data-d="3"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><div><h4>לכל משימה סשן נקי</h4><p>לא לערבב משימות. ביניהן צ'אט חדש.</p></div></div><div class="ncard reveal" data-d="4"><span class="badge " style="background:var(--teal);color:var(--navy)">2</span><div><h4>שני תיקונים לא עזרו?</h4><p>פותחים סשן נקי, עם בקשה טובה יותר.</p></div></div><div class="ncard reveal" data-d="5"><span class="badge " style="background:var(--teal);color:var(--navy)">3</span><div><h4>חקירה כבדה עוברת לסוכן משנה</h4><p>הוא קורא בהקשר נפרד, ומחזיר רק סיכום.</p></div></div><div class="ncard reveal" data-d="6"><span class="badge " style="background:var(--teal);color:var(--navy)">4</span><div><h4>קובץ הנחיות קצר</h4><p>שורה שלא מונעת טעות נמחקת. עד 200 שורות.</p><p class="stat">קובץ צד השרת: <b data-count="316" data-from="505">316</b> שורות במקום 505</p></div></div></div>
+  <div class="grid4"><div class="ncard reveal" data-d="3"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><div><h4>לכל משימה סשן נקי</h4><p>לא לערבב משימות. ביניהן צ'אט חדש.</p></div></div><div class="ncard reveal" data-d="4"><span class="badge " style="background:var(--teal);color:var(--navy)">2</span><div><h4>שני תיקונים לא עזרו?</h4><p>פותחים סשן נקי, עם בקשה טובה יותר.</p></div></div><div class="ncard reveal" data-d="5"><span class="badge " style="background:var(--teal);color:var(--navy)">3</span><div><h4>חקירה כבדה עוברת לסוכן משנה</h4><p>הוא קורא בהקשר נפרד, ומחזיר רק סיכום.</p></div></div><div class="ncard reveal" data-d="6"><span class="badge " style="background:var(--teal);color:var(--navy)">4</span><div><h4>קובץ הנחיות קצר</h4><p>שורה שלא מונעת טעות נמחקת. עד 200 שורות.</p><p class="stat">קובץ צד השרת: ירד מ-505 שורות ל-<b data-count="316" data-from="505">316</b></p></div></div></div>
   <div class="callout reveal" data-d="7"><span class="ours">אצלנו</span><span>כללים נטענים תמיד, נהלים רק כשצריך, וקריאה כבדה עוברת לסוכני משנה.</span></div>
   <button class="ex-btn" type="button" data-ex="subagent" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
   <div class="ex-panel" data-ex-panel="subagent" role="dialog" aria-hidden="true" aria-label="סוכן משנה הוא קובץ אחד">
@@ -815,7 +842,7 @@
   <div class="pagenum">16</div>
 </section>
 <section class="slide" data-n="17" aria-label="שיטה 5: כל טעות לכלל">
-  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="" style="">היסודות</span><span class="on" style="background:var(--gold);color:var(--navy)">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <p class="kicker reveal" data-d="1">שיטה 5 מתוך 5</p><h2 class="title-lg reveal" data-d="1">טעות שחזרה פעמיים הופכת לכלל, כדי שלא תחזור</h2><p class="lead reveal" data-d="2">במקום לתקן את אותה טעות שוב ושוב, מתקנים את הסביבה של הסוכן.</p><div class="term reveal" data-d="2"><span class="tag">מושג</span><b>harness engineering</b><span class="m">בניית ההנחיות, הכלים והבדיקות סביב הסוכן, כך שטעות לא חוזרת</span></div>
     <div class="twocol"><div class="card  reveal" data-d="3"><div class="card-label">מאיפה זה בא</div><p class="src"><b>Mitchell Hashimoto</b> כתב בפברואר 2026</p><p>על כל טעות בונים כלל או בדיקה, כדי שלא תחזור.</p>
         <p class="src"><b>OpenAI</b> פרסמו בפברואר 2026</p><p>המהנדסים לא כתבו קוד. הם בנו את הסביבה.</p></div><div class="card tint reveal" data-d="4"><div class="card-label">איך עושים</div><ul><li>טעות שחזרה פעמיים הופכת לכלל קצר</li><li>כלל שהסוכן מפספס נהיה hook או בדיקה</li><li>כלל שלא עוזר נמחק</li></ul></div></div>
@@ -843,21 +870,21 @@
         <h2 class="dv-title reveal" data-d="2">איך אנחנו עובדים</h2>
         <p class="lead reveal" data-d="3">דוגמה: איך צוות אחד עובד עם זה ביום יום</p>
         <p class="dv-label reveal" data-d="4">בחלק הזה:</p>
-        <ul class="dv-list reveal" data-d="5"><li>הפלייבוק: מקור אחד, ומפתח חדש מצטרף בשתי פקודות</li><li>סרטון: משימה אחת מהכרטיס ועד המיזוג</li><li>יום עבודה: הכלל בכל שלב, ולמה הוא קיים</li><li>מה נשאר באחריות שלכם</li></ul>
+        <ul class="dv-list reveal" data-d="5"><li>הפלייבוק: מקור אחד, ומפתח חדש מצטרף בהתקנה אחת</li><li>סרטון: משימה אחת מהכרטיס ועד המיזוג</li><li>יום עבודה: הכלל בכל שלב, ולמה הוא קיים</li><li>מה נשאר באחריות שלכם</li></ul>
       </div>
       <div class="dv-num reveal" data-d="2" style="color:var(--purple)">03</div>
     </div>
-    <div class="route reveal" data-d="6"><span class="" style=""><small>חלק 1</small><b>היסודות</b></span><span class="" style=""><small>חלק 2</small><b>שיטות העבודה</b></span><span class="on" style="background:var(--purple);color:#fff"><small>חלק 3</small><b>איך אנחנו עובדים</b></span></div>
+    <div class="route reveal" data-d="6"><span class="" style=""><small>חלק 1</small><b>היסודות</b></span><span class="" style=""><small>חלק 2</small><b>שיטות העבודה</b></span><span class="on" style="background:var(--purple);color:#fff"><small>חלק 3</small><b>איך אנחנו עובדים</b></span><span class="" style=""><small>חלק 4</small><b>כשכלל לא מספיק</b></span></div>
   <div class="pagenum">18</div>
 </section>
 <section class="slide" data-n="19" aria-label="הפלייבוק">
-  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <h2 class="title-lg reveal" data-d="1">הפלייבוק: כותבים במקור אחד, וזה מגיע לכל מפתח בצוות</h2>
   <p class="lead reveal" data-d="2">עד סוף אוגוסט היו שש גרסאות שונות של ההנחיות. היום יש מקור אחד.</p>
   <div class="pb" data-fx="flow">
     <div class="pb-col card reveal" data-d="3">
       <p class="pb-label">המקור: מאגר קוד משותף</p><p class="pb-name"><code>engineering-playbook</code></p>
-      <div class="pb-row"><span>משותף לכל המאגרים</span><code>_common/</code></div><div class="pb-row"><span>הנחיות לכל מאגר</span><code>bd-ms/  bd-client/</code></div><div class="pb-row"><span>סקריפטים, כולל hooks</span><code>tooling/</code></div>
+      <div class="pb-row"><span>משותף לכל המאגרים</span><code>_common/</code></div><div class="pb-row"><span>הנחיות לכל מאגר</span><code>bd-ms/  bd-client/</code></div><div class="pb-row"><span>כללים אישיים, רק לסשנים שלו</span><code>_people/</code></div><div class="pb-row"><span>סקריפטים, כולל hooks</span><code>tooling/</code></div>
     </div>
     <div class="flow-gap g1"><svg class="gtrack" viewBox="0 0 66 16" aria-hidden="true">
   <path class="dash" d="M62 8 H9"/><path class="head" d="M17 1.5 L8 8 L17 14.5"/></svg><i class="packet"></i></div>
@@ -868,7 +895,7 @@
     <div class="flow-gap g2"><svg class="gtrack" viewBox="0 0 66 16" aria-hidden="true">
   <path class="dash" d="M62 8 H9"/><path class="head" d="M17 1.5 L8 8 L17 14.5"/></svg><i class="packet"></i></div>
     <div class="pb-col card reveal" data-d="5">
-      <p class="pb-title"><span data-count="165">165</span> עותקים במחשב שלי</p>
+      <p class="pb-title"><span data-count="199">199</span> עותקים במחשב שלי</p>
       <div class="pb-row thin"><span>Claude Code קורא</span><code>CLAUDE.md</code></div><div class="pb-row thin"><span>Codex קורא</span><code>AGENTS.md</code></div><div class="pb-row thin"><span>כללים לפי נתיב</span><code>.claude/rules/</code></div><div class="pb-row thin"><span>נהלים לפי דרישה</span><code>.claude/skills/</code></div><div class="pb-row thin"><span>סוכני משנה</span><code>.claude/agents/</code></div>
     </div>
   </div>
@@ -876,29 +903,32 @@
   <path class="track" d="M170 4 V28 H830 V10"/><path class="head" d="M821 16 L830 6 L839 16"/><circle class="runner" r="8" cx="-30" cy="-30"/></svg>
   <div class="flows reveal" data-d="6">
     <p><svg class="arr" viewBox="0 0 40 14" aria-hidden="true"><path d="M38 7H4M10 1L3 7l7 6" fill="none" stroke="#94A3B8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>בפתיחת סשן, hook מושך את הגרסה האחרונה ומעדכן את הקבצים בעותק.</span></p>
-    <p><svg class="arr" viewBox="0 0 40 14" aria-hidden="true"><path d="M2 7h34M30 1l7 6-7 6" fill="none" stroke="var(--gold)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>מפתח שלמד משהו מריץ את <code>contribute</code> והעריכה חוזרת למקור, ומשם לכל העותקים של הקובץ.</span></p>
+    <p><svg class="arr" viewBox="0 0 40 14" aria-hidden="true"><path d="M2 7h34M30 1l7 6-7 6" fill="none" stroke="var(--gold)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>מפתח שלמד משהו מריץ את <code>contribute</code> והעריכה חוזרת למקור, נפתחת כבקשת משיכה, ומגיעה לכולם אחרי המיזוג.</span></p>
   </div>
   <div class="callout reveal" data-d="7"><span class="ours you">אצלכם</span><span>קובץ הנחיות אחד בתוך המאגר, שעובר code review כמו קוד.</span></div>
   <div class="pagenum">19</div>
 </section>
 <section class="slide" data-n="20" aria-label="מפתח חדש אצלנו">
-  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span></div>
-  <h2 class="title-lg reveal" data-d="1">מפתח חדש אצלנו: שתי פקודות להתקנה, ואחת לבדיקה</h2>
-  <div class="start">
-    <div class="srow reveal" data-d="2"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><div><h3>משכפלים את מאגר הפלייבוק</h3><p>פעם אחת, לתיקייה קבועה:</p>
-      <div class="chips"><code class="chip wide">git clone https://bitbucket.org/sqlink/engineering-playbook.git C:/Dev/engineering-playbook</code></div></div></div>
-    <div class="srow reveal" data-d="3"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><div><h3>מריצים פקודה אחת שמכינה את המחשב</h3><p>היא מתקינה hooks שמעדכנים את ההנחיות בכל סשן:</p>
-      <div class="chips"><code class="chip wide">python C:/Dev/engineering-playbook/AI/tooling/playbook_sync.py bootstrap</code></div></div></div>
-    <div class="srow reveal" data-d="4"><span class="badge " style="background:var(--purple);color:#fff">3</span><div><h3>ומאותו רגע, כל סשן מתעדכן לבד</h3><p>ההנחיות, הכללים והנהלים מגיעים לכל מאגר, ופקודה אחת בודקת שהכול מחובר:</p>
-      <div class="chips"><code class="chip wide">python C:/Dev/engineering-playbook/AI/tooling/playbook_sync.py doctor</code></div></div></div>
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
+  <h2 class="title-lg reveal" data-d="1">מפתח חדש אצלנו: שבעה צעדים פעם אחת, ואז זה מתעדכן לבד</h2>
+  <p class="lead reveal" data-d="2">בכל שורה למטה, <code>sync</code> הוא <code>python C:/Dev/engineering-playbook/AI/tooling/playbook_sync.py</code></p>
+  <div class="start seven">
+    <div class="srow reveal" data-d="3"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><div><h3>משכפלים את מאגר הפלייבוק</h3>
+      <div class="chips"><code class="chip">git clone https://bitbucket.org/sqlink/engineering-playbook.git C:/Dev/engineering-playbook</code></div></div></div><div class="srow reveal" data-d="4"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><div><h3>מתקינים hooks</h3><p>שמונה, ברמת המשתמש ולא ברמת הפרויקט</p>
+      <div class="chips"><code class="chip">sync bootstrap</code></div></div></div><div class="srow reveal" data-d="5"><span class="badge " style="background:var(--purple);color:#fff">3</span><div><h3>רואים מה ישתנה, ורק אז כותבים את העותקים</h3>
+      <div class="chips"><code class="chip">sync status --all</code><code class="chip">sync apply --all --init</code></div></div></div><div class="srow reveal" data-d="6"><span class="badge " style="background:var(--pink);color:#fff">4</span><div><h3>מביאים את הקבצים המקומיים</h3><p>רק למי שעובד בשני מאגרי המוצר</p>
+      <div class="chips"><code class="chip">sync local-init</code><code class="chip">sync apply --all</code></div></div></div><div class="srow reveal" data-d="7"><span class="badge " style="background:var(--blue-box);color:#fff">5</span><div><h3>קובעים איך מפרסמים מהמחשב הזה</h3><p>main מקבל רק את הדחיפות של הבעלים, אז פרסום נפתח כבקשת משיכה</p>
+      <div class="chips"><code class="chip">sync config auto-push on</code></div></div></div><div class="srow reveal" data-d="8"><span class="badge " style="background:var(--teal-dark);color:#fff">6</span><div><h3>לא חובה: כללים לסשנים שלכם בלבד</h3>
+      <div class="chips"><code class="chip">sync push -m "Personal rules for dana" AI/instructions/_people/dana.md</code></div></div></div><div class="srow reveal" data-d="9"><span class="badge " style="background:var(--teal);color:var(--navy)">7</span><div><h3>בודקים</h3><p>doctor בודק את החיווט. probe פותח סשן אמיתי ומשווה מה נטען</p>
+      <div class="chips"><code class="chip">sync doctor</code><code class="chip">sync probe</code></div></div></div>
   </div>
-  <div class="callout reveal" data-d="5"><span class="ours you">אצלכם</span><span>כשקובץ ההנחיות בתוך המאגר, מספיק לשכפל אותו.</span></div>
+  <div class="callout reveal" data-d="10"><span class="ours you">אצלכם</span><span>כשקובץ ההנחיות בתוך המאגר, מספיק לשכפל אותו.</span></div>
   <button class="ex-btn" type="button" data-ex="doctor" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
   <div class="ex-panel" data-ex-panel="doctor" role="dialog" aria-hidden="true" aria-label="ככה נראית הבדיקה של ההתקנה">
     <div class="ex-head"><h3>ככה נראית הבדיקה של ההתקנה</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
     <div class="ex-body">
     <div class="ex-file"><div class="ex-tab"><span>הפלט האמיתי, מקוצר</span><span class="ex-path"><code>playbook_sync.py doctor</code><button class="ex-copy" type="button">העתקה</button></span></div>
-      <pre dir="ltr"><code><span class="ln">playbook doctor</span><span class="ln">  OK    playbook         @4a10623</span><span class="ln">  OK    hooks (user)     all 4 installed: PostToolUse, PreToolUse, SessionEnd, SessionStart</span><span class="ln">  OK    kill switch      off (hooks active)</span><span class="ln">  [...]</span><span class="ln hot">  last seen firing — the hooks record this themselves, so it is measured, not</span><span class="ln hot">  a guess about where a message renders in any particular client:</span><span class="ln">     SessionStart   2026-10-07 07:52:12  C:/Dev  [...]</span><span class="ln hot">     PreToolUse     2026-10-05 10:36:12  denied an edit to a generated copy</span><span class="ln">  [...]</span><span class="ln">  11 ok, 1 warning(s), 0 failure(s)</span></code></pre></div></div>
+      <pre dir="ltr"><code><span class="ln">playbook doctor</span><span class="ln">  OK    hooks (user)     all 8 installed: SessionStart, PreToolUse (Write|Edit), [...]</span><span class="ln">  OK    kill switch      off (hooks active)</span><span class="ln">  OK    targets          bd-client 55, bd-ms 126, engineering-playbook 19, workspace 1</span><span class="ln">  WARN  distribution     6380 current, 5 local-edit, 61 new, 5 unmanaged</span><span class="ln">  WARN  skills           199 of 201 checkouts</span><span class="ln hot">  WARN  agents           199 of 201 checkouts</span><span class="ln hot">  [...]</span><span class="ln">  last seen firing — the hooks record this themselves, so it is measured, not</span><span class="ln hot">  a guess about where a message renders in any particular client:</span><span class="ln hot">     SessionStart   2026-10-30 10:53:38  C:/Dev  [...]</span><span class="ln">     PreToolUse     2026-10-30 11:16:34  claim_gate: deny</span><span class="ln">     Stop           2026-10-29 13:02:23  hebrew_first: block</span><span class="ln">  [...]</span><span class="ln">  8 ok, 4 warning(s), 0 failure(s)</span></code></pre></div></div>
     <p class="ex-note">החלק האחרון נמדד, לא מנוחש: כל hook רושם בעצמו מתי רץ בפעם האחרונה, וכך רואים שהוא באמת עובד.</p>
     
     
@@ -912,7 +942,7 @@
   <div class="pagenum">21</div>
 </section>
 <section class="slide" data-n="22" aria-label="יום עבודה אצלנו">
-  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <h2 class="title-lg reveal" data-d="1">יום עבודה: מה קורה בכל שלב, ולמה הכלל קיים</h2>
   <div class="flow">
     <div class="station" data-step="1">
@@ -957,7 +987,7 @@
     <div class="ex-head"><h3>נוהל כתוב, ושער כבר בצעד הראשון שלו</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
     <div class="ex-body">
     <div class="ex-file"><div class="ex-tab"><span>מהפלייבוק שלנו, מקוצר</span><span class="ex-path"><code>.claude/skills/start-task/SKILL.md</code><button class="ex-copy" type="button">העתקה</button></span></div>
-      <pre dir="ltr"><code><span class="ln">---</span><span class="ln">name: start-task</span><span class="ln">description: Start work on a Jira BN ticket - read the Story, open its sub-task, [...]</span><span class="ln">---</span><span class="ln">[...]</span><span class="ln hot">## 0. Should this be started at all — the gate, and it must be able to fail</span><span class="ln">[...]</span><span class="ln">**Read the issue first (step 1 below), then answer these five from what it says.** State each</span><span class="ln">answer in one line before creating anything. Any of them can stop you.</span><span class="ln"> </span><span class="ln hot">| **1** | **Is it ours to build?** | [...]</span><span class="ln hot">| **2** | **Is it a decision, not an implementation?** | [...]</span><span class="ln hot">| **3** | **Is it blocked?** | [...]</span><span class="ln hot">| **4** | **Is there enough to act on?** | [...]</span><span class="ln hot">| **5** | **Is it already finished?** | [...]</span></code></pre></div></div>
+      <pre dir="ltr"><code><span class="ln">---</span><span class="ln">name: start-task</span><span class="ln">description: Start work on a Jira BN ticket - read the Story, derive its release line [...]</span><span class="ln">---</span><span class="ln">[...]</span><span class="ln hot">## 0. Should this be started at all — the gate, and it must be able to fail</span><span class="ln">[...]</span><span class="ln">**Read the issue first (step 1 below), then answer these six from what it says.** State each</span><span class="ln">answer in one line before creating anything. Any of them can stop you.</span><span class="ln"> </span><span class="ln hot">| **1** | **Is it ours to build?** | [...]</span><span class="ln hot">| **2** | **Is it a decision, not an implementation?** | [...]</span><span class="ln hot">| **3** | **Is it blocked?** | [...]</span><span class="ln hot">| **4** | **Is there enough to act on?** | [...]</span><span class="ln hot">| **5** | **Is it already finished?** | [...]</span><span class="ln hot">| **6** | **Which release line?** | `release_line.py` prints `STOP`: [...]</span></code></pre></div></div>
     <p class="ex-note">השם והתיאור תמיד זמינים לסוכן, וכך הוא יודע מתי לקרוא לנוהל. השאר נטען רק כשמפעילים אותו.</p>
     
     <p class="ex-vscode">ב־VS Code אותו <code>SKILL.md</code> עובד, מתוך <code>.claude/skills</code>, <code>.github/skills</code> או <code>.agents/skills</code>.</p>
@@ -965,7 +995,7 @@
   <div class="pagenum">22</div>
 </section>
 <section class="slide" data-n="23" aria-label="מה נשאר אצלכם">
-  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span></div>
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="on" style="background:var(--purple);color:#fff">איך אנחנו עובדים</span><span class="" style="">כשכלל לא מספיק</span></div>
   <h2 class="title-lg reveal" data-d="1">מה נשאר באחריות שלכם, גם כשהכל עובד</h2>
   <p class="lead reveal" data-d="2">הכללים, הנהלים והסוכנים מצמצמים טעויות, אבל ארבעה שערים נשארים אצל אדם:</p>
   <div class="four">
@@ -988,13 +1018,153 @@
   </div>
   <div class="pagenum">23</div>
 </section>
-<section class="slide dark" data-n="24" aria-label="חמישה הרגלים למחר">
+<section class="slide dark" data-n="24" aria-label="חלק 4: כשכלל לא מספיק">
+  
+  <div class="blob" style="width:560px;height:560px;bottom:-240px;left:-240px;background:var(--navy2)"></div>
+    <div class="divider">
+      <div class="dv-text">
+        <p class="eyebrow reveal" data-d="1" style="color:var(--pink-light)">חלק 4</p>
+        <h2 class="dv-title reveal" data-d="2">כשכלל לא מספיק</h2>
+        <p class="lead reveal" data-d="3">מה עושים כשהכלל כתוב, נטען, ובכל זאת נשבר</p>
+        <p class="dv-label reveal" data-d="4">בחלק הזה:</p>
+        <ul class="dv-list reveal" data-d="5"><li>למה כלל שנטען לא מספיק</li><li>שער נבדק על ההיסטוריה לפני שהוא נכנס</li><li>שער הוא קוד: טסטים, וגרסאות שגויות שהוזרקו</li><li>וכשאין שער: ביקורת בהקשר נקי</li></ul>
+      </div>
+      <div class="dv-num reveal" data-d="2" style="color:var(--pink)">04</div>
+    </div>
+    <div class="route reveal" data-d="6"><span class="" style=""><small>חלק 1</small><b>היסודות</b></span><span class="" style=""><small>חלק 2</small><b>שיטות העבודה</b></span><span class="" style=""><small>חלק 3</small><b>איך אנחנו עובדים</b></span><span class="on" style="background:var(--pink);color:#fff"><small>חלק 4</small><b>כשכלל לא מספיק</b></span></div>
+  <div class="pagenum">24</div>
+</section>
+<section class="slide" data-n="25" aria-label="כלל שנטען לא מספיק">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="on" style="background:var(--pink);color:#fff">כשכלל לא מספיק</span></div>
+  <h2 class="title-lg reveal" data-d="1">90 מתוך 127 הטעויות שתיקנו שברו כלל שכבר היה בחלון</h2>
+  <p class="lead reveal" data-d="2">עברנו על חודש של תיקונים, ושאלנו על כל אחד מה היה שונה אילו הכלל היה נאכף בקוד.</p>
+  <div class="twocol">
+    <div class="card quiet reveal" data-d="3"><div class="card-label">כלל ממליץ</div><p>כלל בקובץ ההנחיות נטען בכל סשן, ונקרא. הוא לא עוצר שום פעולה.</p><p>כשהחלון מתמלא, או כשהמשימה דוחקת, הוא נשאר נכון ולא משנה כלום.</p></div>
+    <div class="card tint big reveal" data-d="4"><div class="card-label">hook אוכף</div><p>hook הוא קוד שרץ לפני הפעולה או אחריה, ויכול לסרב לה.</p><p>בתחילת אוקטובר היו לנו ארבעה, וכולם סנכרון. היום שמונה, וחמישה מהם שערים.</p></div>
+  </div>
+  <div class="hookrow reveal" data-d="5">
+    <p><b>שלושה מסנכרנים</b><code class="chip">session_start</code><code class="chip">post_edit</code><code class="chip">session_end</code></p>
+    <p><b>וחמישה שערים</b><code class="chip gatechip">guard_derived</code><code class="chip gatechip">guard_actions</code><code class="chip gatechip">claim_gate</code><code class="chip gatechip">context_gate</code><code class="chip gatechip">hebrew_first</code></p>
+  </div>
+  <div class="callout reveal" data-d="6"><span>משפט ממליץ, hook אוכף.</span></div>
+  <button class="ex-btn" type="button" data-ex="hooks8" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel" data-ex-panel="hooks8" role="dialog" aria-hidden="true" aria-label="שמונה hooks והשורה הראשונה של כל אחד">
+    <div class="ex-head"><h3>שמונה hooks והשורה הראשונה של כל אחד</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>השורה הראשונה מכל קובץ, באותו סדר כמו למעלה</span><span class="ex-path"><code>AI/tooling/hooks/*.py</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln">SessionStart hook - take what other people published, then make this checkout current.</span><span class="ln">PostToolUse hook - an edit to the source reaches every checkout immediately.</span><span class="ln">SessionEnd hook - never let a guidance edit die unpublished.</span><span class="ln"> </span><span class="ln hot">PreToolUse hook - refuse to edit a generated copy, and name the source instead.</span><span class="ln hot">PreToolUse hook - the acts the guidance reserves for a person are stopped at run time, not only described.</span><span class="ln hot">PreToolUse hook - a number does not leave the session before claim-checker has read it.</span><span class="ln hot">PostToolUse hook - hand over before the window fills, not after.</span><span class="ln hot">Stop hook - a reply to Israel opens in Hebrew.</span></code></pre></div></div>
+    <p class="ex-note">שלושת הראשונים מסנכרנים את ההנחיות. החמישה שמודגשים הם שערים: הם רצים לפני הפעולה או אחריה, ויכולים לעצור אותה.</p>
+    
+    
+  </div>
+  <div class="pagenum">25</div>
+</section>
+<section class="slide" data-n="26" aria-label="שער על ההיסטוריה">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="on" style="background:var(--pink);color:#fff">כשכלל לא מספיק</span></div>
+  <h2 class="title-lg reveal" data-d="1">שער נבדק על ההיסטוריה לפני שמתקינים אותו</h2>
+  <p class="lead reveal" data-d="2">לפני כל שער הרצנו אותו על התמלילים של הסשנים שכבר היו: כמה פעמים הוא היה יורה, ועל מה בדיוק.</p>
+  <div class="four">
+    <div class="card reveal" data-d="3"><h4><code>guard_actions</code></h4><p class="pb-title" style="color:var(--teal)">65,182 פקודות</p><p>25 מחיקות ענף, 127 פקודות GCP, 15 בקשות לסגור ענף מקור ו-6 מיזוגים. כל אחת נקראה, וכולן היו אמיתיות.</p>
+       <p class="muted">עוצר מחיקת ענף, תג גרסה ומיזוג של PR ומסרב לפקודות GCP</p></div><div class="card reveal" data-d="4"><h4><code>claim_gate</code></h4><p class="pb-title" style="color:var(--gold)">627 כתיבות</p><p>אל Jira ואל Confluence. 436 נשאו מספר, ו-380 היו נעצרות. מתוך 30 שנקראו ביד, בערך 26 היו מספר אמיתי.</p>
+       <p class="muted">עוצר כתיבה שנושאת מספר, עד שסוכן בדיקת הטענות ענה</p></div><div class="card reveal" data-d="5"><h4><code>context_gate</code></h4><p class="pb-title" style="color:var(--purple)">222 התראות ב-44 סשנים</p><p>אחרי ההתראה הראשונה הגיעה מסירה 24 פעמים, ודחיסת הקשר בלי מסירה 56 פעמים.</p>
+       <p class="muted">אומר לסוכן למסור כשהחלון מגיע ל-85 אחוז</p></div><div class="card reveal" data-d="6"><h4><code>hebrew_first</code></h4><p class="pb-title" style="color:var(--pink)">980 סיומי תור</p><p>221 מהם נפתחו באנגלית, כלל שכבר היה בהנחיות וכבר היה טעון.</p>
+       <p class="muted">לא נותן לתור להיגמר באנגלית, במחשב שהדליק את זה</p></div>
+  </div>
+  <div class="callout reveal" data-d="7"><span>ושער אחד נפסל ככה: הוא היה יורה ב-61 עצירות מתוך 3,219 וצודק באחת מהן.</span></div>
+  <div class="pagenum">26</div>
+</section>
+<section class="slide" data-n="27" aria-label="שער הוא קוד">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="on" style="background:var(--pink);color:#fff">כשכלל לא מספיק</span></div>
+  <h2 class="title-lg reveal" data-d="1">שער הוא קוד, אז יש לו טסטים</h2>
+  <p class="lead reveal" data-d="2">בתחילת אוקטובר לא היה אף קובץ טסט בכלים שלנו. היום יש עשרה, 2,330 שורות.</p>
+  <div class="twocol">
+    <div class="card tint reveal" data-d="3"><div class="card-label">הפרקטיקה</div><p>ברוב השינויים בכלים כותבים את הגרסאות השגויות הסבירות, ומראים שכל אחת מהן מאדימה לפחות טסט אחד.</p><p>שמונה לכלי שבוחר את קו הגרסה, תשע לשער הפעולות, שתים-עשרה לפרסום, ושלושים ושלוש בשינוי האחרון של שער הטענות.</p></div>
+    <div class="card warn reveal" data-d="4"><div class="card-label">הטעות שכולם כותבים</div><p>למיין את שמות הקווים כמחרוזות. ככה <code>1.10</code> יושב מתחת לגרסה <code>1.9</code> והענף נפתח מהקו הלא נכון.</p><p>היא יושבת אצלנו כגרסה שהוזרקה, ויש טסט שנופל בדיוק בגללה.</p></div>
+  </div>
+  <div class="callout reveal" data-d="5"><span class="ours">אצלנו</span><span>וכמה commits כותבים שאחת הגרסאות שהוזרקו הייתה הניסיון הראשון של הכותב.</span></div>
+  <button class="ex-btn" type="button" data-ex="release-line" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel two" data-ex-panel="release-line" role="dialog" aria-hidden="true" aria-label="הכלי שבוחר את קו הגרסה, ומה הוא אומר כשאי אפשר">
+    <div class="ex-head"><h3>הכלי שבוחר את קו הגרסה, ומה הוא אומר כשאי אפשר</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>עם Fix Version אחד</span><span class="ex-path"><code>release_line.py</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln hot">LINE    release/1.1, from Fix Version v1.1.0</span><span class="ln">WARN    no --repo given: the line is derived but not checked against origin</span></code></pre></div>
+    <div class="ex-file"><div class="ex-tab"><span>עם שתיים, ובלי אף אחת</span><span class="ex-path"><code>release_line.py</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln hot">STOP    the ticket has 2 Fix Versions (v1.0.1, v1.1.0). A branch merges into one line: ask</span><span class="ln">        which. A fix merged into the older line reaches the newer ones by the forward merge</span><span class="ln"> </span><span class="ln hot">STOP    the ticket has no Fix Version, so no line can be derived. Ask for one; never pick</span><span class="ln">        a line yourself</span></code></pre></div></div>
+    <p class="ex-note">אין ניחוש ואין ברירת מחדל: או שהכרטיס אומר על איזה קו העבודה יושבת, או שהכלי עוצר ואומר למה.</p>
+    
+    
+  </div>
+  <div class="pagenum">27</div>
+</section>
+<section class="slide" data-n="28" aria-label="ארבע גרסאות">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="on" style="background:var(--pink);color:#fff">כשכלל לא מספיק</span></div>
+  <h2 class="title-lg reveal" data-d="1">ארבע גרסאות בארבעה ימים, וכל אחת לקח</h2>
+  <p class="lead reveal" data-d="2">השער שעוצר מספר לפני שהוא יוצא מהסשן. כל מה שלמטה לקוח מהודעות commit שלו.</p>
+  <div class="rows">
+    <div class="row reveal" data-d="3"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><h3>19 באוקטובר, הותקן</h3><p>אחרי replay על 627 כתיבות, ואחרי שגרסת טיוטה נפסלה כי היא שפטה לפי ההודעה האחרונה של האדם.</p></div><div class="row reveal" data-d="4"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><h3>21 באוקטובר, עברית שברה אותו</h3><p>הקלט נכתב בקידוד UTF-8 ופייתון בחלונות קרא אותו בקידוד cp1255 ואז השער לא מצא את הקריאה שהוא שופט, ושבע מתוך תשע הקריאות עם תו לא-אנגלי נדחו, אחת מהן בדיקה שעשינו בכוונה כדי לשחזר.</p></div><div class="row reveal" data-d="5"><span class="badge " style="background:var(--purple);color:#fff">3</span><h3>21 באוקטובר, curl</h3><p>הפקודה <code>curl -d @pr.json</code> שולחת POST בלי שהמילה POST מופיעה בה, וקריאה כזו עברה בלי בדיקה. עכשיו קוראים את השיטה המשתמעת.</p></div><div class="row reveal" data-d="6"><span class="badge " style="background:var(--pink);color:#fff">4</span><h3>22 באוקטובר, בקשה אחת בכל פעם</h3><p>קריאה אחת יכולה לפתוח PR וגם להגיב עליו. מקרי הטסט של השערים עלו מ-80 ל-159 ושלושים ושלוש גרסאות שגויות הוזרקו אחת-אחת.</p></div>
+  </div>
+  <div class="callout reveal" data-d="7"><span>כל תיקון הורץ שוב על ההיסטוריה, כדי לראות אילו החלטות באמת השתנו.</span></div>
+  <button class="ex-btn" type="button" data-ex="claim-gate" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel" data-ex-panel="claim-gate" role="dialog" aria-hidden="true" aria-label="מה הסוכן רואה כשהשער עוצר אותו">
+    <div class="ex-head"><h3>מה הסוכן רואה כשהשער עוצר אותו</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>נוסח הסירוב, מתוך הקוד של השער</span><span class="ex-path"><code>AI/tooling/hooks/claim_gate.py</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln hot">Stopped before it leaves the session: [...], and no claim-checker verdict came back since the previous</span><span class="ln">write like this one. Team rule: run claim-checker before a number leaves the session. Hand it each</span><span class="ln">claim in the words you will publish, read the verdict, fix what it refutes, then make this call</span><span class="ln">again.</span></code></pre></div></div>
+    <p class="ex-note">השער לא מסביר מה לכתוב. הוא אומר מה חסר, ומה צריך לקרות לפני שהקריאה הזאת תעבור.</p>
+    
+    
+  </div>
+  <div class="pagenum">28</div>
+</section>
+<section class="slide" data-n="29" aria-label="ביקורת בהקשר נקי">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="on" style="background:var(--pink);color:#fff">כשכלל לא מספיק</span></div>
+  <h2 class="title-lg reveal" data-d="1">ביקורת בהקשר נקי, כי אין מי שיעצור</h2>
+  <p class="lead reveal" data-d="2">במאגר שלנו אין בדיקות חובה למיזוג ואין אישור חובה, אז זו הסקירה היחידה שהשינוי מקבל.</p>
+  <div class="twocol">
+    <div class="card warn reveal" data-d="3"><div class="card-label">מה קרה</div><p>ב-22 באוקטובר סוכן ביקורת קיבל שינוי שכבר עבר replay נקי, ומצא בו 14 רגרסיות.</p></div>
+    <div class="card tint big reveal" data-d="4"><div class="card-label">מה נכנס לנוהל</div><p>כל שינוי שהוא יותר מתיקון בקובץ אחד עובר סוכן שלא כתב אותו, עוד לפני שנפתחת בקשת המשיכה.</p><p>הוא מקבל את ההבדלים מול קו הגרסה, ואת רשימת הקבלה של הכרטיס. כל ממצא מתוקן או נענה, ונרשם בתיאור של בקשת המשיכה.</p></div>
+  </div>
+  <div class="callout reveal" data-d="5"><span class="ours you">אצלכם</span><span>מי שכתב את הקוד הוא לא הסוקר שלו, גם כשהוא סוכן.</span></div>
+  <div class="pagenum">29</div>
+</section>
+<section class="slide" data-n="30" aria-label="הפלייבוק כמוצר">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="on" style="background:var(--pink);color:#fff">כשכלל לא מספיק</span></div>
+  <h2 class="title-lg reveal" data-d="1">הפלייבוק הוא מוצר של הצוות, עם כל מה שנגזר מזה</h2>
+  <p class="lead reveal" data-d="2">ברגע שההנחיות הן מוצר משותף, מתנהגים אליהן כמו למוצר: מסלול פרסום, גרסאות, תקלות ומדידה.</p>
+  <div class="four">
+    <div class="card reveal" data-d="3"><h4>פרסום דרך PR</h4><p>main מקבל רק את הדחיפות של הבעלים, וכל שאר המחשבים מפרסמים בענף ובקשת משיכה.</p><p class="muted">אותו מסלול כמו קוד: ענף, בקשת משיכה ומיזוג</p></div><div class="card reveal" data-d="4"><h4>כללים אישיים שרק מוסיפים</h4><p>60 שורות ו-6,000 בתים לאדם, ושלושה מתגים לכיבוי. הגרסה הראשונה נתנה לכלל אישי לנצח כל כלל צוות שלא סומן אדום, והיא הוחזרה כבר למחרת בבוקר.</p><p class="muted">התקן של הצוות נשאר שלם, והאדם עדיין מקבל את מה שהוא צריך</p></div><div class="card reveal" data-d="5"><h4>תקלה שקטה</h4><p>שבעה קבצי כללים נטענו בכל סשן במקום לפי נתיב. סשן במאגר של צד השרת נפתח עם תשעה קבצי הנחיות, 99,925 בתים. קציר לקחים מצא את זה, לא טסט.</p><p class="muted">שום שגיאה לא נזרקה, ואף אחד לא הרגיש</p></div><div class="card reveal" data-d="6"><h4>היחס בין השניים</h4><p>6,384 שורות של הנחיות ב-38 קבצים, מול 8,244 שורות של hooks ושל הטסטים והסקריפטים שלהם.</p><p class="muted">רוב העבודה היא לא כתיבת הכללים, אלא בניית מה שאוכף אותם</p></div>
+  </div>
+  <div class="callout reveal" data-d="7"><span class="ours">אצלנו</span><span>קציר של חודש תיקונים נתן 37 לקחים, ועשרה מהם נכנסו להנחיות.</span></div>
+  <button class="ex-btn" type="button" data-ex="people" aria-expanded="false"><span class="ic" dir="ltr">&lt;/&gt;</span>איך זה נראה</button>
+  <div class="ex-panel" data-ex-panel="people" role="dialog" aria-hidden="true" aria-label="כללים אישיים: תקציב, ושלוש דרכים לכבות">
+    <div class="ex-head"><h3>כללים אישיים: תקציב, ושלוש דרכים לכבות</h3><button class="ex-x" type="button" aria-label="סגירה">×</button></div>
+    <div class="ex-body">
+    <div class="ex-file"><div class="ex-tab"><span>מתוך המסמך של הכללים האישיים</span><span class="ex-path"><code>AI/instructions/_people/README.md</code><button class="ex-copy" type="button">העתקה</button></span></div>
+      <pre dir="ltr"><code><span class="ln hot">Where a personal rule conflicts with a team rule, the team rule wins.</span><span class="ln"> </span><span class="ln hot">The budget is 60 lines and 6,000 bytes of rules per file</span><span class="ln"> </span><span class="ln">To stop:</span><span class="ln">- you, everywhere: delete your file;</span><span class="ln">- you, on one machine: `python AI/tooling/playbook_sync.py config personal off`</span><span class="ln">- the whole team: add a file named `OFF` to this folder, and delete it to switch back.</span></code></pre></div></div>
+    <p class="ex-note">כלל אישי רק מוסיף. הגרסה הראשונה נתנה לו לנצח כלל צוות, וזה הוחזר אחרי יום.</p>
+    
+    
+  </div>
+  <div class="pagenum">30</div>
+</section>
+<section class="slide" data-n="31" aria-label="כתיבה כמו בן אדם">
+  <div class="tracker"><span class="" style="">היסודות</span><span class="" style="">שיטות העבודה</span><span class="" style="">איך אנחנו עובדים</span><span class="on" style="background:var(--pink);color:#fff">כשכלל לא מספיק</span></div>
+  <h2 class="title-lg reveal" data-d="1">כתיבה שלא נשמעת כמו מכונה, גם היא כלל</h2>
+  <p class="lead reveal" data-d="2">ההרצאה הזו היא מה שהתחיל את זה. ב-7 באוקטובר קראתי את התסריט ואמרתי שהוא עדיין נשמע כמו מכונה.</p>
+  <div class="twocol">
+    <div class="card tint reveal" data-d="3"><div class="card-label">מה עשינו</div><p>הכנסנו skill חיצוני בשם ben-adam ברישיון MIT בלי לשכתב אותו: הועתק בית-בית, עם הגרסה המדויקת שממנה נלקח ורשימה כתובה של כל מה ששינינו בו.</p><p>כל סוכן מריץ אותו על הטקסט שלו, לפני שהטקסט יוצא החוצה.</p></div>
+    <div class="card quiet reveal" data-d="4"><div class="card-label">מה הוא אוכף</div><ul><li>אפס מקפים ארוכים, בעברית ובאנגלית</li><li>רגיסטר לפי סוג הפלט: צ'אט, כרטיס, הנחיות</li><li>מילים של מפתחים נשארות בעברית בשורה עברית</li><li>וכלל אפס שגובר על הסגנון: לא להוסיף עובדה, מספר או דוגמה שאין במקור</li></ul></div>
+  </div>
+  <div class="callout reveal" data-d="5"><span class="ours you">אצלכם</span><span>כל טקסט שאדם יקרא עובר את זה לפני שהוא יוצא.</span></div>
+  <div class="pagenum">31</div>
+</section>
+<section class="slide dark" data-n="32" aria-label="חמישה הרגלים למחר">
   
   <div class="blob" style="width:560px;height:560px;bottom:-240px;left:-240px;background:var(--navy2)"></div><h2 class="title-lg reveal" data-d="1">חמישה הרגלים למחר</h2>
   <div class="habits"><div class="habit key" data-step="1"><span class="badge " style="background:var(--teal);color:var(--navy)">1</span><div><h3><span class="gtag">שער</span>לפני שמקבלים מסקנה מהסוכן, שואלים על איזו הנחה היא נשענת.</h3><p>ובודקים בעצמכם: על מה זה רץ, ומה היה צריך לצאת.</p></div></div><div class="habit" data-step="2"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><div><h3><span class="gtag">שער</span>לפני שאומרים "סיימתי": איזו בדיקה יכלה להיכשל, ולא נכשלה?</h3><p>אם אין בדיקה כזו, עוד לא בדקתם.</p></div></div><div class="habit" data-step="2"><span class="badge " style="background:var(--purple);color:#fff">3</span><div><h3>לכל משימה סשן נקי.</h3><p>גם שני תיקונים שלא עזרו הם סיבה להתחיל מחדש.</p></div></div><div class="habit" data-step="2"><span class="badge " style="background:var(--pink);color:#fff">4</span><div><h3><span class="gtag">שער</span>שינוי שאי אפשר לתאר במשפט אחד מתחיל בתוכנית.</h3><p>לחקור, לתכנן, ורק אז לכתוב קוד.</p></div></div><div class="habit" data-step="3"><span class="badge " style="background:var(--blue-box);color:#fff">5</span><div><h3>טעות שחזרה פעמיים הופכת לכלל.</h3><p>בקובץ ההנחיות של הפרויקט, כדי שיגיע לכל הצוות.</p></div></div></div>
-  <div class="pagenum">24</div>
+  <div class="pagenum">32</div>
 </section>
-<section class="slide" data-n="25" aria-label="איך מתחילים">
+<section class="slide" data-n="33" aria-label="איך מתחילים">
   
   <h2 class="title-lg reveal" data-d="1">איך מתחילים מחר בבוקר, בכל פרויקט</h2>
   <div class="start">
@@ -1027,9 +1197,9 @@
     
     
   </div>
-  <div class="pagenum">25</div>
+  <div class="pagenum">33</div>
 </section>
-<section class="slide dark" data-n="26" aria-label="שאלות">
+<section class="slide dark" data-n="34" aria-label="שאלות">
   
   
   <div class="blob" style="width:420px;height:420px;top:-140px;left:-60px;background:var(--navy2)"></div>
@@ -1038,35 +1208,35 @@
   <div class="hero-line"><span class="title-hero">שאלות?</span></div>
   <p class="lead hero-sub reveal" data-d="2">אפשר גם בצ'אט.</p>
   <p class="last-q reveal" data-d="3">ומה ההנחה שלא אמרתם היום?</p>
-  <div class="pagenum">26</div>
+  <div class="pagenum">34</div>
 </section>
-<section class="slide" data-n="27" aria-label="נספח: כללים קשיחים">
+<section class="slide" data-n="35" aria-label="נספח: כללים קשיחים">
   
   <p class="kicker reveal" data-d="1">נספח</p><h2 class="title-lg reveal" data-d="1">מה שחייב לקרות תמיד, לא משאירים כבקשה</h2><p class="lead reveal" data-d="2">הנחיה היא המלצה, והסוכן יכול לפספס אותה.</p><div class="term reveal" data-d="2"><span class="tag">מושג</span><b>hook</b><span class="m">סקריפט שרץ אוטומטית ברגע קבוע, ולכן הוא רץ תמיד</span></div><p class="gate reveal" data-d="3"><span class="tag">שער</span><span>בכל פעם, בלי שמישהו יבקש: מה שחייב לקרות רץ לבד</span></p>
     <div class="twocol"><div class="card  reveal" data-d="4"><div class="card-label">שלושה מנגנונים</div><ul><li><b>hooks</b> רצים אוטומטית, בכל פעם</li><li><b>הרשאות</b> קובעות מה מותר בלי לשאול</li><li><b>סקירה בהקשר נקי</b>: סוכן נפרד בודק את השינוי</li></ul></div><div class="card tint reveal" data-d="5"><div class="card-label">דוגמאות</div><ul><li>hook שמריץ lint אחרי כל עריכה</li><li>hook שחוסם שינויים בתיקיית migrations</li><li>סוכן שבודק את השינוי מול התוכנית</li></ul></div></div>
     <div class="callout reveal" data-d="6"><span class="ours">אצלנו</span><span>hook מסנכרן את ההנחיות בכל סשן, וסוכן בשם <code>claim-checker</code> בודק טענות.</span></div>
-  <div class="pagenum">27</div>
+  <div class="pagenum">35</div>
 </section>
-<section class="slide" data-n="28" aria-label="נספח: חמש טעויות נפוצות">
+<section class="slide" data-n="36" aria-label="נספח: חמש טעויות נפוצות">
   
   <p class="kicker reveal" data-d="1">נספח</p><h2 class="title-lg reveal" data-d="1">חמש טעויות נפוצות. כמה מהן עשיתם השבוע?</h2>
   <div class="mistakes">
     <div class="m-head reveal" data-d="2"><span></span><span></span><span>מה קורה</span><span class="fix">התיקון</span></div>
     <div class="m-row" data-step="1"><span class="badge " style="background:var(--gold);color:var(--navy)">1</span><b>הסשן שמכיל הכל</b><span>משימה, שאלה צדדית, ושוב המשימה</span><span class="fix">צ'אט חדש לכל משימה</span></div><div class="m-row" data-step="1"><span class="badge " style="background:var(--gold);color:var(--navy)">2</span><b>תיקון אחרי תיקון</b><span>ההקשר מתמלא בניסיונות כושלים</span><span class="fix">סשן נקי, בקשה טובה יותר</span></div><div class="m-row" data-step="1"><span class="badge " style="background:var(--gold);color:var(--navy)">3</span><b>קובץ הנחיות ארוך מדי</b><span>הכללים החשובים הולכים לאיבוד</span><span class="fix">לקצץ, או לבנות hook</span></div><div class="m-row" data-step="2"><span class="badge " style="background:var(--gold);color:var(--navy)">4</span><b>סומכים בלי לבדוק</b><span>מימוש סביר בלי מקרי קצה</span><span class="fix">אם אין בדיקה, לא משחררים</span></div><div class="m-row" data-step="3"><span class="badge " style="background:var(--gold);color:var(--navy)">5</span><b>החקירה שלא נגמרת</b><span>בקשה בלי גבולות, ומאות קבצים נקראים</span><span class="fix">לתחום, או סוכן משנה</span></div>
   </div>
-  <div class="pagenum">28</div>
+  <div class="pagenum">36</div>
 </section>
-<section class="slide" data-n="29" aria-label="נספח: מילון מושגים">
+<section class="slide" data-n="37" aria-label="נספח: מילון מושגים">
   
   <p class="kicker reveal" data-d="1">נספח</p><h2 class="title-lg reveal" data-d="1">מילון מושגים</h2>
   <div class="gloss"><div class="g reveal" data-d="2"><h4>מודל שפה (LLM)</h4><p>מנבא את ההמשך הסביר של טקסט וקוד</p></div><div class="g reveal" data-d="3"><h4>טוקן (token)</h4><p>יחידת טקסט, לרוב חלק ממילה</p></div><div class="g reveal" data-d="4"><h4>חלון ההקשר</h4><p>כל מה שהמודל רואה כרגע, במקום מוגבל</p></div><div class="g reveal" data-d="5"><h4>context rot</h4><p>ירידה באיכות ככל שהחלון מתמלא</p></div><div class="g reveal" data-d="6"><h4>סוכן (agent)</h4><p>מודל עם כלים, שעובד בלולאה</p></div><div class="g reveal" data-d="7"><h4>harness</h4><p>התוכנה סביב המודל, כמו Claude Code</p></div><div class="g reveal" data-d="8"><h4>worktree</h4><p>עותק עבודה נוסף של אותו מאגר</p></div><div class="g reveal" data-d="9"><h4>plan mode</h4><p>רק קריאה ותכנון, בלי שינוי קבצים</p></div><div class="g reveal" data-d="10"><h4>סוכן משנה (subagent)</h4><p>סוכן נפרד, שמחזיר רק מסקנה</p></div><div class="g reveal" data-d="11"><h4>hook</h4><p>סקריפט שתמיד רץ, ברגע קבוע</p></div><div class="g reveal" data-d="12"><h4>skill</h4><p>נוהל כתוב שנטען במלואו רק כשמפעילים</p></div><div class="g reveal" data-d="13"><h4>harness engineering</h4><p>בניית הסביבה, כך שטעות לא חוזרת</p></div></div>
-  <div class="pagenum">29</div>
+  <div class="pagenum">37</div>
 </section>
-<section class="slide" data-n="30" aria-label="נספח: שאלות נפוצות">
+<section class="slide" data-n="38" aria-label="נספח: שאלות נפוצות">
   
   <p class="kicker reveal" data-d="1">נספח</p><h2 class="title-lg reveal" data-d="1">שאלות נפוצות</h2>
   <div class="faq"><div class="qa reveal" data-d="2"><h4>זה מחליף סקירת קוד?</h4><p>לא. הסוכן מקצר את הדרך לקוד, אבל הבדיקה והשיפוט נשארים אצל אדם.</p></div><div class="qa reveal" data-d="3"><h4>האם Copilot או Cursor עובדים באותה צורה?</h4><p>כן. העקרונות לא תלויים בכלי, וקובץ הנחיות אחד יכול לשרת את כולם. אצלנו Claude Code מריץ גם את האוטומציה.</p></div><div class="qa reveal" data-d="4"><h4>מה עם סודות ואבטחה?</h4><p>לא מכניסים סודות להקשר, מוסיפים קבצים לפי נתיב, והרשאות וגם hooks חוסמים פעולות מסוכנות.</p></div><div class="qa reveal" data-d="5"><h4>הסוכן טועה שוב ושוב?</h4><p>אחרי שני תיקונים פותחים סשן נקי עם בקשה טובה יותר. טעות שחוזרת הופכת לכלל.</p></div><div class="qa reveal" data-d="6"><h4>איך מתחילים בצוות שלנו?</h4><p>קובץ הנחיות אחד במאגר, טעות שחוזרת הופכת לשורה בו, ומה שחייב לקרות רץ לבד.</p></div></div>
-  <div class="pagenum">30</div>
+  <div class="pagenum">38</div>
 </section>
 <div id="dots"></div>
 </div></div>
@@ -1075,7 +1245,7 @@
 <div id="laser"></div>
 <div id="presenter"></div>
 <pre id="check-out" hidden></pre>
-<script type="application/json" id="notes">[{"n":1,"title":"פתיחה: הייתם ממזגים?","start":0,"sec":24.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":2,"title":"פתיחה","start":24.5,"sec":34,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":3,"title":"מה בהרצאה הזו, ומה בהרצאות אחרות","start":58.5,"sec":50.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":4,"title":"המפה והמטרות","start":109,"sec":39,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":5,"title":"חלק 1: היסודות","start":148,"sec":14,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":6,"title":"מודל שפה","start":162,"sec":72,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":7,"title":"חלון ההקשר","start":234,"sec":61,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":8,"title":"סוכן","start":295,"sec":74.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":9,"title":"המקרה: אתם הייתם ממזגים?","start":369.5,"sec":31.000000000000004,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":10,"title":"התשובה: העותק הלא נכון","start":400.5,"sec":116,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"worktree","title":"הרבה עותקים של אותו מאגר, וכלל אחד שמונע את הטעות","live":false,"via":null}]},{"n":11,"title":"שלושה סוגים של טעות","start":516.5,"sec":55.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"claim-checker","title":"לסוג השלישי יש אצלנו סוכן משלו","live":false,"via":null}]},{"n":12,"title":"חלק 2: שיטות העבודה","start":572,"sec":17.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":13,"title":"שיטה 1: בדיקה","start":589.5,"sec":82,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"checks","title":"בדיקה שהסוכן יכול להריץ: פעם אחת, ובלי מצב צפייה","live":false,"via":null}]},{"n":14,"title":"שיטה 2: תכנון","start":671.5,"sec":116,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"plan","title":"מצב תכנון: איך נכנסים, ומה מבקשים ממנו","live":false,"via":null}]},{"n":15,"title":"שיטה 3: ספציפיות","start":787.5,"sec":58.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"prompts","title":"אותו רעיון, בבקשות מהעולם שלכם","live":false,"via":null}]},{"n":16,"title":"שיטה 4: ניהול ההקשר","start":846,"sec":132,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"subagent","title":"סוכן משנה הוא קובץ אחד","live":true,"via":null}]},{"n":17,"title":"שיטה 5: כל טעות לכלל","start":978,"sec":98,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"hook","title":"כך נראה hook שחוסם עריכה של תיקיית Migrations","live":true,"via":null}]},{"n":18,"title":"חלק 3: איך אנחנו עובדים","start":1076,"sec":16.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":19,"title":"הפלייבוק","start":1092.5,"sec":52,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":20,"title":"מפתח חדש אצלנו","start":1144.5,"sec":36,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"doctor","title":"ככה נראית הבדיקה של ההתקנה","live":false,"via":null}]},{"n":21,"title":"מהכרטיס ועד המיזוג","start":1180.5,"sec":187.6,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":22,"title":"יום עבודה אצלנו","start":1368.1,"sec":46,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"skill","title":"נוהל כתוב, ושער כבר בצעד הראשון שלו","live":false,"via":null}]},{"n":23,"title":"מה נשאר אצלכם","start":1414.1,"sec":70,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"permissions","title":"הרשאות: מה מותר, על מה שואלים, ומה אסור","live":false,"via":null}]},{"n":24,"title":"חמישה הרגלים למחר","start":1484.1,"sec":63.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":25,"title":"איך מתחילים","start":1547.6,"sec":90,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"agents-md","title":"קובץ הנחיות ביום הראשון","live":true,"via":null},{"id":"gates","title":"שערים אוטומטיים: בדיקות שרצות בלי שמישהו יזכור","live":false,"via":"chip"}]},{"n":26,"title":"שאלות","start":1637.6,"sec":24,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":27,"title":"נספח: כללים קשיחים","start":1661.6,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]},{"n":28,"title":"נספח: חמש טעויות נפוצות","start":1661.6,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]},{"n":29,"title":"נספח: מילון מושגים","start":1661.6,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]},{"n":30,"title":"נספח: שאלות נפוצות","start":1661.6,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]}]</script>
+<script type="application/json" id="notes">[{"n":1,"title":"פתיחה: הייתם ממזגים?","start":0,"sec":24.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":2,"title":"פתיחה","start":24.5,"sec":34,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":3,"title":"מה בהרצאה הזו, ומה בהרצאות אחרות","start":58.5,"sec":50.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":4,"title":"המפה והמטרות","start":109,"sec":39,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":5,"title":"חלק 1: היסודות","start":148,"sec":14,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":6,"title":"מודל שפה","start":162,"sec":83,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":7,"title":"חלון ההקשר","start":245,"sec":101,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"context","title":"מה באמת היה בחלון: 183 סשנים במחשב שלי","live":false,"via":null}]},{"n":8,"title":"סוכן","start":346,"sec":74.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":9,"title":"המקרה: אתם הייתם ממזגים?","start":420.5,"sec":31.000000000000004,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":10,"title":"התשובה: העותק הלא נכון","start":451.5,"sec":139.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"worktree","title":"הרבה עותקים של אותו מאגר, וכלל אחד שמונע את הטעות","live":false,"via":null}]},{"n":11,"title":"שלושה סוגים של טעות","start":591,"sec":88.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"claim-checker","title":"לסוג השלישי יש אצלנו סוכן משלו","live":false,"via":null}]},{"n":12,"title":"חלק 2: שיטות העבודה","start":679.5,"sec":17.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":13,"title":"שיטה 1: בדיקה","start":697,"sec":113,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"checks","title":"בדיקה שהסוכן יכול להריץ: פעם אחת, ובלי מצב צפייה","live":false,"via":null}]},{"n":14,"title":"שיטה 2: תכנון","start":810,"sec":162.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"plan","title":"מצב תכנון: איך נכנסים, ומה מבקשים ממנו","live":false,"via":null}]},{"n":15,"title":"שיטה 3: ספציפיות","start":972.5,"sec":82,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"prompts","title":"אותו רעיון, בבקשות מהעולם שלכם","live":false,"via":null}]},{"n":16,"title":"שיטה 4: ניהול ההקשר","start":1054.5,"sec":160.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"subagent","title":"סוכן משנה הוא קובץ אחד","live":true,"via":null}]},{"n":17,"title":"שיטה 5: כל טעות לכלל","start":1215,"sec":130,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"hook","title":"כך נראה hook שחוסם עריכה של תיקיית Migrations","live":true,"via":null}]},{"n":18,"title":"חלק 3: איך אנחנו עובדים","start":1345,"sec":16.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":19,"title":"הפלייבוק","start":1361.5,"sec":55.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":20,"title":"מפתח חדש אצלנו","start":1417,"sec":84,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"doctor","title":"ככה נראית הבדיקה של ההתקנה","live":false,"via":null}]},{"n":21,"title":"מהכרטיס ועד המיזוג","start":1501,"sec":199.1,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":22,"title":"יום עבודה אצלנו","start":1700.1,"sec":71.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"skill","title":"נוהל כתוב, ושער כבר בצעד הראשון שלו","live":false,"via":null}]},{"n":23,"title":"מה נשאר אצלכם","start":1771.6,"sec":86,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"permissions","title":"הרשאות: מה מותר, על מה שואלים, ומה אסור","live":false,"via":null}]},{"n":24,"title":"חלק 4: כשכלל לא מספיק","start":1857.6,"sec":6.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":25,"title":"כלל שנטען לא מספיק","start":1864.1,"sec":52.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"hooks8","title":"שמונה hooks והשורה הראשונה של כל אחד","live":false,"via":null}]},{"n":26,"title":"שער על ההיסטוריה","start":1916.6,"sec":53.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":27,"title":"שער הוא קוד","start":1970.1,"sec":63.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"release-line","title":"הכלי שבוחר את קו הגרסה, ומה הוא אומר כשאי אפשר","live":false,"via":null}]},{"n":28,"title":"ארבע גרסאות","start":2033.6,"sec":60.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"claim-gate","title":"מה הסוכן רואה כשהשער עוצר אותו","live":false,"via":null}]},{"n":29,"title":"ביקורת בהקשר נקי","start":2094.1,"sec":41,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":30,"title":"הפלייבוק כמוצר","start":2135.1,"sec":58.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"people","title":"כללים אישיים: תקציב, ושלוש דרכים לכבות","live":false,"via":null}]},{"n":31,"title":"כתיבה כמו בן אדם","start":2193.6,"sec":46,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":32,"title":"חמישה הרגלים למחר","start":2239.6,"sec":74.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":33,"title":"איך מתחילים","start":2314.1,"sec":108.5,"cut":false,"appendix":false,"script":[],"more":[],"ex":[{"id":"agents-md","title":"קובץ הנחיות ביום הראשון","live":true,"via":null},{"id":"gates","title":"שערים אוטומטיים: בדיקות שרצות בלי שמישהו יזכור","live":false,"via":"chip"}]},{"n":34,"title":"שאלות","start":2422.6,"sec":24,"cut":false,"appendix":false,"script":[],"more":[],"ex":[]},{"n":35,"title":"נספח: כללים קשיחים","start":2446.6,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]},{"n":36,"title":"נספח: חמש טעויות נפוצות","start":2446.6,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]},{"n":37,"title":"נספח: מילון מושגים","start":2446.6,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]},{"n":38,"title":"נספח: שאלות נפוצות","start":2446.6,"sec":0,"cut":false,"appendix":true,"script":[],"more":[],"ex":[]}]</script>
 <script>
 (() => {
   const NOTES = JSON.parse(document.getElementById('notes').textContent);
